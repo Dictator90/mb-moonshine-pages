@@ -38,8 +38,8 @@ class MoonshinePagesServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'moonshine-pages');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'moonshine-pages');
 
-        if ((bool) config('moonshine-pages.register_page_route', false)) {
-            $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        if (config('moonshine-pages.register_page_route', true)) {
+            $this->loadRoutesFrom(__DIR__.'/../routes/moonshine-pages.php');
         }
 
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
@@ -64,7 +64,7 @@ class MoonshinePagesServiceProvider extends ServiceProvider
             MenuResource::class,
         ]);
 
-        if ((bool) config('moonshine-pages.moonshine.register_menu_items', false)) {
+        if (config('moonshine-pages.moonshine.register_menu_items', true)) {
             $menu->add([
                 MenuGroup::make(__('moonshine-pages::moonshine-pages.menu_group.content'), [
                     MenuItem::make(MenuResource::class, __('moonshine-pages::moonshine-pages.menu.resource_title')),
