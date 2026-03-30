@@ -1,0 +1,77 @@
+<?php
+
+declare(strict_types=1);
+
+use MB\MoonShine\Http\Controllers\PageShowController;
+use MB\MoonShine\Models\Menu;
+use MB\MoonShine\Models\MenuPosition;
+use MB\MoonShine\Models\Page;
+
+return [
+    /*
+    |--------------------------------------------------------------------------
+    | Register package page route
+    |--------------------------------------------------------------------------
+    |
+    | If true, the package will register its own public page route.
+    | If false, the host application can define the route manually.
+    |
+    */
+    'register_page_route' => false,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Models
+    |--------------------------------------------------------------------------
+    |
+    | Override these classes if you want to use your own Eloquent models.
+    | Classes must be compatible with package relations and fields.
+    |
+    */
+    'models' => [
+        'page' => Page::class,
+        'menu' => Menu::class,
+        'menu_position' => MenuPosition::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Controllers
+    |--------------------------------------------------------------------------
+    |
+    | Override package controllers used by routes.
+    |
+    */
+    'controllers' => [
+        'page_show' => PageShowController::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Route settings
+    |--------------------------------------------------------------------------
+    |
+    | route_prefix:
+    | - ''          => /{slug}
+    | - 'landings'  => /landings/{slug}
+    |
+    */
+    'route' => [
+        'route_prefix' => '',
+        'name' => 'page.show',
+        'slug_pattern' => '^[A-Za-z0-9-_]+$',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | MoonShine menu integration
+    |--------------------------------------------------------------------------
+    |
+    | If true, package resources will be automatically added to MoonShine menu.
+    | Keep false when your app builds menu in a custom layout.
+    |
+    */
+    'moonshine' => [
+        'register_menu_items' => false,
+    ],
+];
