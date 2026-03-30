@@ -17,7 +17,7 @@ return [
     | If false, the host application can define the route manually.
     |
     */
-    'register_page_route' => false,
+    'register_page_route' => true,
 
     /*
     |--------------------------------------------------------------------------
