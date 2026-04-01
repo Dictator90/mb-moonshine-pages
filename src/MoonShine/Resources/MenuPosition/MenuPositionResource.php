@@ -15,8 +15,6 @@ use MoonShine\UI\Fields\Number;
 use MoonShine\UI\Fields\Text;
 use MoonShine\UI\Fields\Textarea;
 
-#[Icon('list-bullet')]
-#[Group('moonshine-pages::moonshine-pages.menu_group.content', 'list-bullet', translatable: true)]
 class MenuPositionResource extends ModelResource
 {
     protected string $model = MenuPosition::class;

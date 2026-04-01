@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MB\MoonShine\MoonShine\Resources\Menu\Pages;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Route as IlluminateRoute;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
@@ -17,9 +19,7 @@ use MoonShine\Laravel\Fields\Relationships\BelongsTo;
 use MoonShine\Laravel\Fields\Relationships\BelongsToMany;
 use MoonShine\Laravel\Pages\Crud\FormPage;
 use MoonShine\UI\Components\Layout\Box;
-use MoonShine\UI\Components\Layout\Column;
 use MoonShine\UI\Components\Layout\Flex;
-use MoonShine\UI\Components\Layout\Grid;
 use MoonShine\UI\Components\Tabs;
 use MoonShine\UI\Components\Tabs\Tab;
 use MoonShine\UI\Fields\Date;
@@ -74,7 +74,12 @@ final class MenuFormPage extends FormPage
                                 'route' => __('moonshine-pages::moonshine-pages.menu.source_types.route'),
                             ])
                             ->default('link')
-                            ->required(),
+                            ->required()
+                            ->mergeAttribute(
+                                'x-on:change',
+                                $this->showWhenRefreshDispatchExpression(),
+                                ';'
+                            ),
 
                         Text::make(__('moonshine-pages::moonshine-pages.menu.fields.link'), 'link')
                             ->fromRaw(function (mixed $raw): ?string {
@@ -96,21 +101,29 @@ final class MenuFormPage extends FormPage
                             ->nullable()
                             ->showWhen('source_type', 'page'),
 
-                        Grid::make([
-                            Column::make([
-                                Select::make(__('moonshine-pages::moonshine-pages.menu.fields.route'), 'source_value')
-                                    ->options($this->getRouteOptions())
-                                    ->showWhen('source_type', 'route'),
-                            ], 6, 6),
-                            Column::make(
-                                $this->getRouteParameterFields(),
-                                6,
-                                6
+                        Select::make(__('moonshine-pages::moonshine-pages.menu.fields.route'), 'source_value')
+                            ->nullable()
+                            ->options($this->getRouteOptions())
+                            ->showWhen('source_type', 'route')
+                            ->mergeAttribute(
+                                'x-on:change',
+                                $this->showWhenRefreshDispatchExpression(),
+                                ';'
                             ),
-                        ]),
+
+                        ...$this->getRouteParameterFields(),
 
                         BelongsTo::make(__('moonshine-pages::moonshine-pages.menu.fields.parent'), 'parent', null, MenuResource::class)
-                            ->nullable(),
+                            ->nullable()
+                            ->valuesQuery(function (Builder $query, BelongsTo $field): Builder {
+                                $original = $field->getData()?->getOriginal();
+
+                                if ($original instanceof Model && $original->getKey() !== null) {
+                                    $query->whereKeyNot($original->getKey());
+                                }
+
+                                return $query;
+                            }),
                     ]),
                 ]),
             ]),
@@ -130,11 +143,11 @@ final class MenuFormPage extends FormPage
             'route' => ['nullable', 'string', 'max:255'],
             'source_value' => ['nullable', 'string', 'max:255'],
             'route_params' => ['nullable', 'array'],
-            'parent_id' => [
+            'parent_id' => array_values(array_filter([
                 'nullable',
                 'integer',
-                Rule::notIn([$id]),
-            ],
+                $id !== null ? Rule::notIn([(int) $id]) : null,
+            ])),
         ];
 
         foreach ($this->extractRouteParameters($this->resolveSelectedRouteName()) as $parameter) {
@@ -190,6 +203,25 @@ final class MenuFormPage extends FormPage
         foreach ($this->getParametersToRoutesMap($routeParametersMap) as $parameter => $routeNames) {
             $fields[] = Text::make(__('moonshine-pages::moonshine-pages.menu.fields.route_parameter', ['parameter' => $parameter]), "route_params.$parameter")
                 ->fromRaw(fn (mixed $raw): ?string => data_get($raw, "route_params.$parameter"))
+                ->onApply(function (mixed $menu, mixed $value) use ($parameter): mixed {
+                    $routeParams = data_get($menu, 'route_params');
+
+                    if (! is_array($routeParams)) {
+                        $routeParams = [];
+                    }
+
+                    $stringValue = is_scalar($value) ? trim((string) $value) : '';
+
+                    if ($stringValue === '') {
+                        unset($routeParams[$parameter]);
+                    } else {
+                        $routeParams[$parameter] = $stringValue;
+                    }
+
+                    data_set($menu, 'route_params', $routeParams);
+
+                    return $menu;
+                })
                 ->showWhen('source_type', 'route')
                 ->showWhen('source_value', 'in', $routeNames)
                 ->hint(__('moonshine-pages::moonshine-pages.menu.hints.route_parameter'));
@@ -200,6 +232,18 @@ final class MenuFormPage extends FormPage
 
     private function resolveSelectedRouteName(): ?string
     {
+        $uriKey = $this->getResource()->getUriKey();
+
+        $fromReactive = request()->input('values.source_value');
+        if (is_string($fromReactive) && $fromReactive !== '') {
+            return $fromReactive;
+        }
+
+        $nested = data_get(request()->all(), $uriKey.'.source_value');
+        if (is_string($nested) && $nested !== '') {
+            return $nested;
+        }
+
         $sourceValueFromRequest = request()->string('source_value')->toString();
 
         if ($sourceValueFromRequest !== '') {
@@ -297,5 +341,17 @@ final class MenuFormPage extends FormPage
         ksort($parametersToRoutesMap);
 
         return $parametersToRoutesMap;
+    }
+
+    /**
+     * After {@see Select} gains a real `name` in the DOM, MoonShine must re-run `whenFieldsInit`
+     * so `showWhen` conditions that depend on `source_value` are registered (skipped on first init
+     * while the route select is hidden).
+     */
+    private function showWhenRefreshDispatchExpression(): string
+    {
+        $formName = $this->getResource()->getUriKey();
+
+        return "\$nextTick(() => \$dispatch('show_when_refresh:{$formName}'))";
     }
 }

@@ -12,9 +12,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Routing\Exceptions\UrlGenerationException;
 use Illuminate\Support\Facades\Route;
 use MB\MoonShine\Services\Menu\MenuRepository;
+use MB\MoonShine\Support\MoonShinePagesTables;
 
 class Menu extends Model
 {
+    public function getTable(): string
+    {
+        return MoonShinePagesTables::menus();
+    }
+
     protected $fillable = [
         'name',
         'menu_position_id',
@@ -44,7 +50,7 @@ class Menu extends Model
 
     public function positions(): BelongsToMany
     {
-        return $this->belongsToMany($this->menuPositionModelClass(), 'menu_menu_position');
+        return $this->belongsToMany($this->menuPositionModelClass(), MoonShinePagesTables::menuMenuPosition());
     }
 
     public function page(): BelongsTo

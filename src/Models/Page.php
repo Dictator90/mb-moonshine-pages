@@ -6,9 +6,15 @@ namespace MB\MoonShine\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use MB\MoonShine\Support\MoonShinePagesTables;
 
 class Page extends Model
 {
+    public function getTable(): string
+    {
+        return MoonShinePagesTables::pages();
+    }
+
     protected $fillable = [
         'title',
         'slug',

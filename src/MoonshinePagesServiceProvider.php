@@ -67,10 +67,10 @@ class MoonshinePagesServiceProvider extends ServiceProvider
         if (config('moonshine-pages.moonshine.register_menu_items', true)) {
             $menu->add([
                 MenuGroup::make(__('moonshine-pages::moonshine-pages.menu_group.content'), [
-                    MenuItem::make(MenuResource::class, __('moonshine-pages::moonshine-pages.menu.resource_title')),
-                    MenuItem::make(MenuPositionResource::class, __('moonshine-pages::moonshine-pages.menu_position.resource_title')),
-                    MenuItem::make(PageResource::class, __('moonshine-pages::moonshine-pages.page.resource_title')),
-                ]),
+                    MenuItem::make(MenuResource::class, __('moonshine-pages::moonshine-pages.menu.resource_title'), 'list-bullet'),
+                    MenuItem::make(MenuPositionResource::class, __('moonshine-pages::moonshine-pages.menu_position.resource_title'), 'view-columns'),
+                    MenuItem::make(PageResource::class, __('moonshine-pages::moonshine-pages.page.resource_title'), 'document-text'),
+                ], 'rectangle-stack'),
             ]);
         }
     }

@@ -11,53 +11,58 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (! Schema::hasTable('menu_positions')) {
-            Schema::create('menu_positions', function (Blueprint $table): void {
-                $table->id();
-                $table->string('name');
-                $table->string('code')->unique();
-                $table->integer('sort_order')->default(0);
-                $table->text('description')->nullable();
-                $table->timestamps();
+        $positionsTable = (string) config('moonshine-pages.tables.menu_positions', 'menu_positions');
+        $menusTable = (string) config('moonshine-pages.tables.menus', 'menus');
+        $pivotTable = (string) config('moonshine-pages.tables.menu_menu_position', 'menu_menu_position');
+        $pagesTable = (string) config('moonshine-pages.tables.pages', 'pages');
 
-                $table->index('sort_order');
+        if (! Schema::hasTable($positionsTable)) {
+            Schema::create($positionsTable, function (Blueprint $blueprint): void {
+                $blueprint->id();
+                $blueprint->string('name');
+                $blueprint->string('code')->unique();
+                $blueprint->integer('sort_order')->default(0);
+                $blueprint->text('description')->nullable();
+                $blueprint->timestamps();
+
+                $blueprint->index('sort_order');
             });
         }
 
-        if (! Schema::hasTable('menus')) {
-            Schema::create('menus', function (Blueprint $table): void {
-                $table->id();
-                $table->boolean('is_active')->default(true);
-                $table->string('name');
-                $table->integer('sort_order')->default(0);
-                $table->string('source_type', 50)->default('link');
-                $table->string('source_value')->nullable();
-                $table->json('route_params')->nullable();
-                $table->foreignId('page_id')->nullable()->constrained('pages')->nullOnDelete();
-                $table->foreignId('parent_id')->nullable()->constrained('menus')->nullOnDelete();
-                $table->foreignId('menu_position_id')->nullable()->constrained('menu_positions')->nullOnDelete();
-                $table->string('target', 20)->nullable();
-                $table->timestamps();
+        if (! Schema::hasTable($menusTable)) {
+            Schema::create($menusTable, function (Blueprint $blueprint) use ($pagesTable, $menusTable, $positionsTable): void {
+                $blueprint->id();
+                $blueprint->boolean('is_active')->default(true);
+                $blueprint->string('name');
+                $blueprint->integer('sort_order')->default(0);
+                $blueprint->string('source_type', 50)->default('link');
+                $blueprint->string('source_value')->nullable();
+                $blueprint->json('route_params')->nullable();
+                $blueprint->foreignId('page_id')->nullable()->constrained($pagesTable)->nullOnDelete();
+                $blueprint->foreignId('parent_id')->nullable()->constrained($menusTable)->nullOnDelete();
+                $blueprint->foreignId('menu_position_id')->nullable()->constrained($positionsTable)->nullOnDelete();
+                $blueprint->string('target', 20)->nullable();
+                $blueprint->timestamps();
 
-                $table->index('parent_id');
-                $table->index('page_id');
-                $table->index('sort_order');
-                $table->index('source_type');
+                $blueprint->index('parent_id');
+                $blueprint->index('page_id');
+                $blueprint->index('sort_order');
+                $blueprint->index('source_type');
             });
         }
 
-        if (! Schema::hasTable('menu_menu_position')) {
-            Schema::create('menu_menu_position', function (Blueprint $table): void {
-                $table->id();
-                $table->foreignId('menu_id')->constrained('menus')->cascadeOnDelete();
-                $table->foreignId('menu_position_id')->constrained('menu_positions')->cascadeOnDelete();
-                $table->unique(['menu_id', 'menu_position_id']);
+        if (! Schema::hasTable($pivotTable)) {
+            Schema::create($pivotTable, function (Blueprint $blueprint) use ($menusTable, $positionsTable): void {
+                $blueprint->id();
+                $blueprint->foreignId('menu_id')->constrained($menusTable)->cascadeOnDelete();
+                $blueprint->foreignId('menu_position_id')->constrained($positionsTable)->cascadeOnDelete();
+                $blueprint->unique(['menu_id', 'menu_position_id']);
             });
         }
 
         $now = now();
 
-        DB::table('menu_positions')->updateOrInsert(
+        DB::table($positionsTable)->updateOrInsert(
             ['code' => 'main'],
             [
                 'name' => 'Header',
@@ -68,7 +73,7 @@ return new class extends Migration
             ]
         );
 
-        DB::table('menu_positions')->updateOrInsert(
+        DB::table($positionsTable)->updateOrInsert(
             ['code' => 'footer'],
             [
                 'name' => 'Footer',
@@ -82,8 +87,12 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('menu_menu_position');
-        Schema::dropIfExists('menus');
-        Schema::dropIfExists('menu_positions');
+        $positionsTable = (string) config('moonshine-pages.tables.menu_positions', 'menu_positions');
+        $menusTable = (string) config('moonshine-pages.tables.menus', 'menus');
+        $pivotTable = (string) config('moonshine-pages.tables.menu_menu_position', 'menu_menu_position');
+
+        Schema::dropIfExists($pivotTable);
+        Schema::dropIfExists($menusTable);
+        Schema::dropIfExists($positionsTable);
     }
 };

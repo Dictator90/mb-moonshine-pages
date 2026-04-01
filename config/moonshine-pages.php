@@ -36,6 +36,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Database table names
+    |--------------------------------------------------------------------------
+    |
+    | Override when your schema uses custom table names. Must match migrations
+    | (publish and edit migrations if you change these on a new project).
+    |
+    */
+    'tables' => [
+        'pages' => 'pages',
+        'menus' => 'menus',
+        'menu_positions' => 'menu_positions',
+        'menu_menu_position' => 'menu_menu_position',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Controllers
     |--------------------------------------------------------------------------
     |

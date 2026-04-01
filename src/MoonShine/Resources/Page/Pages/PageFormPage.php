@@ -6,6 +6,7 @@ namespace MB\MoonShine\MoonShine\Resources\Page\Pages;
 
 use Illuminate\Support\Str;
 use MB\MoonShine\MoonShine\Resources\Page\PageResource;
+use MB\MoonShine\Support\MoonShinePagesTables;
 use MoonShine\CKEditor\Fields\CKEditor;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\ComponentContract;
@@ -67,7 +68,7 @@ final class PageFormPage extends FormPage
 
         return [
             'title' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', 'unique:pages,slug,'.$id],
+            'slug' => ['required', 'string', 'max:255', 'unique:'.MoonShinePagesTables::pages().',slug,'.$id],
             'content' => ['required', 'string'],
             'is_active' => ['boolean'],
             'seo_title' => ['nullable', 'string', 'max:255'],

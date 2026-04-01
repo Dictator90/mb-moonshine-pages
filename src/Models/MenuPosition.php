@@ -6,9 +6,15 @@ namespace MB\MoonShine\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use MB\MoonShine\Support\MoonShinePagesTables;
 
 class MenuPosition extends Model
 {
+    public function getTable(): string
+    {
+        return MoonShinePagesTables::menuPositions();
+    }
+
     protected $fillable = [
         'name',
         'code',
@@ -28,6 +34,6 @@ class MenuPosition extends Model
         /** @var class-string<Model> $menuModel */
         $menuModel = (string) config('moonshine-pages.models.menu', Menu::class);
 
-        return $this->belongsToMany($menuModel, 'menu_menu_position');
+        return $this->belongsToMany($menuModel, MoonShinePagesTables::menuMenuPosition());
     }
 }

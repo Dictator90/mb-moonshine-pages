@@ -17,6 +17,7 @@ use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Number;
 use MoonShine\UI\Fields\Switcher;
 use MoonShine\UI\Fields\Text;
+use MoonShine\UI\Fields\Select;
 
 /**
  * @extends IndexPage<MenuResource>
@@ -59,7 +60,15 @@ final class MenuIndexPage extends IndexPage
     {
         return [
             Text::make(__('moonshine-pages::moonshine-pages.menu.fields.name'), 'name'),
-            Text::make(__('moonshine-pages::moonshine-pages.menu.fields.source_type'), 'source_type'),
+            BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
+                ->selectMode()
+                ->searchable(),
+            Select::make(__('moonshine-pages::moonshine-pages.menu.fields.source_type'), 'source_type')
+                ->options([
+                    'link' => __('moonshine-pages::moonshine-pages.menu.source_types.link'),
+                    'page' => __('moonshine-pages::moonshine-pages.menu.source_types.page'),
+                    'route' => __('moonshine-pages::moonshine-pages.menu.source_types.route'),
+                ]),
         ];
     }
 }

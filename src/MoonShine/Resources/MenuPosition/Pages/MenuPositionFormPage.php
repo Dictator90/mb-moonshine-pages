@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MB\MoonShine\MoonShine\Resources\MenuPosition\Pages;
 
 use MB\MoonShine\MoonShine\Resources\MenuPosition\MenuPositionResource;
+use MB\MoonShine\Support\MoonShinePagesTables;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
@@ -58,7 +59,7 @@ final class MenuPositionFormPage extends FormPage
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'code' => ['required', 'string', 'max:100', 'unique:menu_positions,code,'.$id],
+            'code' => ['required', 'string', 'max:100', 'unique:'.MoonShinePagesTables::menuPositions().',code,'.$id],
             'description' => ['nullable', 'string'],
             'sort_order' => ['integer'],
         ];

@@ -19,8 +19,6 @@ use MoonShine\UI\Fields\Select;
 use MoonShine\UI\Fields\Switcher;
 use MoonShine\UI\Fields\Text;
 
-#[Icon('list-bullet')]
-#[Group('moonshine-pages::moonshine-pages.menu_group.content', 'list-bullet', translatable: true)]
 class MenuResource extends ModelResource
 {
     protected string $model = MenuModel::class;

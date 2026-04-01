@@ -11,22 +11,24 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (! Schema::hasTable('pages')) {
-            Schema::create('pages', function (Blueprint $table): void {
-                $table->id();
-                $table->string('title');
-                $table->string('slug')->unique();
-                $table->boolean('is_active')->default(true);
-                $table->longText('content');
-                $table->string('seo_title')->nullable();
-                $table->string('seo_description', 500)->nullable();
-                $table->timestamps();
+        $pagesTable = (string) config('moonshine-pages.tables.pages', 'pages');
 
-                $table->index('is_active');
+        if (! Schema::hasTable($pagesTable)) {
+            Schema::create($pagesTable, function (Blueprint $blueprint): void {
+                $blueprint->id();
+                $blueprint->string('title');
+                $blueprint->string('slug')->unique();
+                $blueprint->boolean('is_active')->default(true);
+                $blueprint->longText('content');
+                $blueprint->string('seo_title')->nullable();
+                $blueprint->string('seo_description', 500)->nullable();
+                $blueprint->timestamps();
+
+                $blueprint->index('is_active');
             });
         }
 
-        DB::table('pages')->updateOrInsert(
+        DB::table($pagesTable)->updateOrInsert(
             ['slug' => 'moonshine-pages-demo'],
             [
                 'title' => 'Демо страница',
@@ -42,6 +44,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('pages');
+        $pagesTable = (string) config('moonshine-pages.tables.pages', 'pages');
+        Schema::dropIfExists($pagesTable);
     }
 };

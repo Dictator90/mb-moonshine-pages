@@ -15,8 +15,6 @@ use MoonShine\UI\Fields\Switcher;
 use MoonShine\UI\Fields\Text;
 use MoonShine\UI\Fields\Textarea;
 
-#[Icon('document-text')]
-#[Group('moonshine-pages::moonshine-pages.menu_group.content', 'document-text', translatable: true)]
 class PageResource extends ModelResource
 {
     protected string $model = Page::class;
@@ -25,8 +23,6 @@ class PageResource extends ModelResource
 
     protected function onBoot(): void
     {
-        parent::onBoot();
-
         $this->model = (string) config('moonshine-pages.models.page', Page::class);
     }
 

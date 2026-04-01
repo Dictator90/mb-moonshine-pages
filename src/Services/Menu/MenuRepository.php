@@ -72,7 +72,7 @@ class MenuRepository
         $items = $menuModel::query()
             ->active()
             ->whereHas('positions', function ($query) use ($position): void {
-                $query->where('menu_positions.id', $position->id);
+                $query->where($position->getTable().'.id', $position->id);
             })
             ->with(['page', 'positions'])
             ->orderBy('parent_id')
