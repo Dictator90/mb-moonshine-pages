@@ -7,9 +7,9 @@ namespace MB\MoonShine\MoonShine\Resources\MenuPosition;
 use MB\MoonShine\Models\MenuPosition;
 use MB\MoonShine\MoonShine\Resources\MenuPosition\Pages\MenuPositionFormPage;
 use MB\MoonShine\MoonShine\Resources\MenuPosition\Pages\MenuPositionIndexPage;
+use MoonShine\Laravel\Pages\Crud\DetailPage;
 use MoonShine\Laravel\Resources\ModelResource;
-use MoonShine\MenuManager\Attributes\Group;
-use MoonShine\Support\Attributes\Icon;
+use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Number;
 use MoonShine\UI\Fields\Text;
@@ -38,6 +38,31 @@ class MenuPositionResource extends ModelResource
         return [
             MenuPositionIndexPage::class,
             MenuPositionFormPage::class,
+            DetailPage::class,
+        ];
+    }
+
+    protected function detailFields(): iterable
+    {
+        return [
+            ID::make(),
+
+            Text::make(__('moonshine-pages::moonshine-pages.menu_position.fields.name'), 'name'),
+
+            Text::make(__('moonshine-pages::moonshine-pages.menu_position.fields.code'), 'code'),
+
+            Number::make(__('moonshine-pages::moonshine-pages.common.sort_order'), 'sort_order'),
+
+            Textarea::make(__('moonshine-pages::moonshine-pages.menu_position.fields.description'), 'description')
+                ->customAttributes(['rows' => 3]),
+
+            Date::make(__('moonshine-pages::moonshine-pages.common.created_at'), 'created_at')
+                ->format('d.m.Y H:i')
+                ->withTime(),
+
+            Date::make(__('moonshine-pages::moonshine-pages.common.updated_at'), 'updated_at')
+                ->format('d.m.Y H:i')
+                ->withTime(),
         ];
     }
 

@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace MB\MoonShine\MoonShine\Resources\Page;
 
 use MB\MoonShine\Models\Page;
+use MB\MoonShine\MoonShine\Resources\Page\Pages\PageDetailPage;
 use MB\MoonShine\MoonShine\Resources\Page\Pages\PageFormPage;
 use MB\MoonShine\MoonShine\Resources\Page\Pages\PageIndexPage;
 use MoonShine\Laravel\Resources\ModelResource;
-use MoonShine\MenuManager\Attributes\Group;
-use MoonShine\Support\Attributes\Icon;
+use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\ID;
+use MoonShine\UI\Fields\Preview;
 use MoonShine\UI\Fields\Switcher;
 use MoonShine\UI\Fields\Text;
 use MoonShine\UI\Fields\Textarea;
@@ -36,6 +37,35 @@ class PageResource extends ModelResource
         return [
             PageIndexPage::class,
             PageFormPage::class,
+            PageDetailPage::class,
+        ];
+    }
+
+    protected function detailFields(): iterable
+    {
+        return [
+            ID::make(),
+
+            Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active'),
+
+            Text::make(__('moonshine-pages::moonshine-pages.page.fields.title'), 'title'),
+
+            Text::make(__('moonshine-pages::moonshine-pages.page.fields.slug'), 'slug'),
+
+            Preview::make(__('moonshine-pages::moonshine-pages.page.fields.content'), 'content'),
+
+            Text::make(__('moonshine-pages::moonshine-pages.page.fields.seo_title'), 'seo_title'),
+
+            Textarea::make(__('moonshine-pages::moonshine-pages.page.fields.seo_description'), 'seo_description')
+                ->customAttributes(['rows' => 3]),
+
+            Date::make(__('moonshine-pages::moonshine-pages.common.created_at'), 'created_at')
+                ->format('d.m.Y H:i')
+                ->withTime(),
+
+            Date::make(__('moonshine-pages::moonshine-pages.common.updated_at'), 'updated_at')
+                ->format('d.m.Y H:i')
+                ->withTime(),
         ];
     }
 

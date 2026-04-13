@@ -26,6 +26,8 @@ return [
             'page' => 'Page',
             'route' => 'Route',
             'route_parameter' => 'Route parameter: :parameter',
+            'route_params' => 'Route parameters',
+            'source_value' => 'Link or route name',
             'parent' => 'Parent',
         ],
         'source_types' => [
@@ -51,6 +53,9 @@ return [
     ],
     'page' => [
         'resource_title' => 'Pages',
+        'actions' => [
+            'open_public' => 'Open on site',
+        ],
         'fields' => [
             'title' => 'Title',
             'slug' => 'Slug',

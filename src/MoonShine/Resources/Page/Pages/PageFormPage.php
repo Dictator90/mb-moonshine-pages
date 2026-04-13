@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace MB\MoonShine\MoonShine\Resources\Page\Pages;
 
 use Illuminate\Support\Str;
+use MB\MoonShine\MoonShine\Resources\Page\PagePublicActionButton;
 use MB\MoonShine\MoonShine\Resources\Page\PageResource;
 use MB\MoonShine\Support\MoonShinePagesTables;
 use MoonShine\CKEditor\Fields\CKEditor;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
+use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Laravel\Fields\Slug;
 use MoonShine\Laravel\Pages\Crud\FormPage;
+use MoonShine\Support\ListOf;
 use MoonShine\UI\Components\Layout\Box;
 use MoonShine\UI\Components\Tabs;
 use MoonShine\UI\Components\Tabs\Tab;
@@ -60,6 +63,25 @@ final class PageFormPage extends FormPage
                 ]),
             ]),
         ];
+    }
+
+    /**
+     * @return ListOf<ActionButtonContract>
+     */
+    protected function buttons(): ListOf
+    {
+        return new ListOf(ActionButtonContract::class, [
+            $this->modifyDetailButton(
+                $this->getResource()->getDetailButton()
+            ),
+            PagePublicActionButton::make(),
+            $this->modifyDeleteButton(
+                $this->getResource()->getDeleteButton(
+                    redirectAfterDelete: $this->getResource()->getRedirectAfterDelete(),
+                    isAsync: false,
+                )
+            ),
+        ]);
     }
 
     protected function rules(DataWrapperContract $item): array

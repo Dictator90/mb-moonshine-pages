@@ -26,6 +26,8 @@ return [
             'page' => 'Страница',
             'route' => 'Маршрут',
             'route_parameter' => 'Параметр маршрута: :parameter',
+            'route_params' => 'Параметры маршрута',
+            'source_value' => 'Ссылка или имя маршрута',
             'parent' => 'Родитель',
         ],
         'source_types' => [
@@ -51,6 +53,9 @@ return [
     ],
     'page' => [
         'resource_title' => 'Страницы',
+        'actions' => [
+            'open_public' => 'Открыть на сайте',
+        ],
         'fields' => [
             'title' => 'Название',
             'slug' => 'Slug',

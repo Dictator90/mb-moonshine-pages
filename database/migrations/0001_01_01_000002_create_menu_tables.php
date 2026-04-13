@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -59,30 +58,6 @@ return new class extends Migration
                 $blueprint->unique(['menu_id', 'menu_position_id']);
             });
         }
-
-        $now = now();
-
-        DB::table($positionsTable)->updateOrInsert(
-            ['code' => 'main'],
-            [
-                'name' => 'Header',
-                'sort_order' => 10,
-                'description' => null,
-                'updated_at' => $now,
-                'created_at' => $now,
-            ]
-        );
-
-        DB::table($positionsTable)->updateOrInsert(
-            ['code' => 'footer'],
-            [
-                'name' => 'Footer',
-                'sort_order' => 20,
-                'description' => null,
-                'updated_at' => $now,
-                'created_at' => $now,
-            ]
-        );
     }
 
     public function down(): void

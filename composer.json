@@ -2,7 +2,7 @@
     "name": "mb4it/moonshine-pages",
     "description": "MoonShine pages and menu package",
     "type": "library",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "license": "MIT",
     "require": {
         "php": "^8.2",
@@ -20,6 +20,18 @@
         "files": [
             "src/Support/helpers.php"
         ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MB\\MoonShine\\Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.0",
+        "phpunit/phpunit": "^11.5"
+    },
+    "scripts": {
+        "test": "phpunit --configuration phpunit.xml"
     },
     "extra": {
         "laravel": {

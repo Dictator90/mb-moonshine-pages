@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -27,19 +26,6 @@ return new class extends Migration
                 $blueprint->index('is_active');
             });
         }
-
-        DB::table($pagesTable)->updateOrInsert(
-            ['slug' => 'moonshine-pages-demo'],
-            [
-                'title' => 'Демо страница',
-                'is_active' => false,
-                'content' => '<p>Демо страница пакета moonshine-pages.</p>',
-                'seo_title' => null,
-                'seo_description' => null,
-                'updated_at' => now(),
-                'created_at' => now(),
-            ]
-        );
     }
 
     public function down(): void

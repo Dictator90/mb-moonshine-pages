@@ -69,6 +69,7 @@ final class MenuIndexPage extends IndexPage
                     'page' => __('moonshine-pages::moonshine-pages.menu.source_types.page'),
                     'route' => __('moonshine-pages::moonshine-pages.menu.source_types.route'),
                 ]),
+            Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active'),
         ];
     }
 }

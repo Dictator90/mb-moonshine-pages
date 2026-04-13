@@ -38,10 +38,6 @@ class MoonshinePagesServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'moonshine-pages');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'moonshine-pages');
 
-        if (config('moonshine-pages.register_page_route', true)) {
-            $this->loadRoutesFrom(__DIR__.'/../routes/moonshine-pages.php');
-        }
-
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         if ($this->app->runningInConsole()) {
@@ -73,5 +69,13 @@ class MoonshinePagesServiceProvider extends ServiceProvider
                 ], 'rectangle-stack'),
             ]);
         }
+
+        $this->app->booted(function (): void {
+            if (! config('moonshine-pages.register_page_route', true)) {
+                return;
+            }
+
+            $this->loadRoutesFrom(__DIR__.'/../routes/moonshine-pages.php');
+        });
     }
 }

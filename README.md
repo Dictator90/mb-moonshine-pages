@@ -18,7 +18,7 @@ MoonShine package for managing pages and navigation menus in Laravel application
 
 - PHP 8.2+
 - Laravel 12+
-- moonshine/moonshine 4.8+
+- moonshine/moonshine 4+
 
 ## Installation
 

@@ -76,6 +76,16 @@ return [
         'route_prefix' => '',
         'name' => 'page.show',
         'slug_pattern' => '^[A-Za-z0-9-_]+$',
+        /*
+        | When true, single-segment slugs that match reserved_slugs (or MoonShine admin
+        | prefix when reserved_slugs is null) are not handled by the page route.
+        */
+        'apply_reserved_slugs' => true,
+        /*
+        | Exact first-URL-segment values to exclude (e.g. admin panel prefix). Use null
+        | to derive the MoonShine panel prefix from config('moonshine.prefix', 'admin').
+        */
+        'reserved_slugs' => null,
     ],
 
     /*
@@ -88,6 +98,6 @@ return [
     |
     */
     'moonshine' => [
-        'register_menu_items' => false,
+        'register_menu_items' => true,
     ],
 ];
