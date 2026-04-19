@@ -7,9 +7,11 @@ namespace MB\MoonShine\MoonShine\Resources\Page\Pages;
 use MB\MoonShine\MoonShine\Resources\Page\PagePublicActionButton;
 use MB\MoonShine\MoonShine\Resources\Page\PageResource;
 use MoonShine\Contracts\UI\ActionButtonContract;
+use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Laravel\Pages\Crud\IndexPage;
 use MoonShine\Support\ListOf;
+use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Switcher;
@@ -30,8 +32,19 @@ final class PageIndexPage extends IndexPage
             Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active'),
             Text::make(__('moonshine-pages::moonshine-pages.page.fields.title'), 'title'),
             Text::make(__('moonshine-pages::moonshine-pages.page.fields.slug'), 'slug'),
+            Text::make(__('moonshine-pages::moonshine-pages.page.fields.seo_title'), 'seo_title'),
+            Date::make(__('moonshine-pages::moonshine-pages.common.created_at'), 'created_at'),
             Date::make(__('moonshine-pages::moonshine-pages.common.updated_at'), 'updated_at'),
         ];
+    }
+
+    protected function modifyListComponent(ComponentContract $component): ComponentContract
+    {
+        if ($component instanceof TableBuilder) {
+            return $component->columnSelection();
+        }
+
+        return $component;
     }
 
     /**
@@ -69,6 +82,8 @@ final class PageIndexPage extends IndexPage
         return [
             Text::make(__('moonshine-pages::moonshine-pages.page.fields.title'), 'title'),
             Text::make(__('moonshine-pages::moonshine-pages.page.fields.slug'), 'slug'),
+            Text::make(__('moonshine-pages::moonshine-pages.page.fields.seo_title'), 'seo_title'),
+            Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active'),
         ];
     }
 }

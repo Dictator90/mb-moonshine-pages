@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace MB\MoonShine\MoonShine\Resources\MenuPosition\Pages;
 
+use Illuminate\Database\Eloquent\Model;
+use MB\MoonShine\Models\Menu;
+use MB\MoonShine\MoonShine\Resources\Menu\MenuResource;
 use MB\MoonShine\MoonShine\Resources\MenuPosition\MenuPositionResource;
 use MB\MoonShine\Support\MoonShinePagesTables;
+use Illuminate\Validation\Rule;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
+use MoonShine\Contracts\UI\TableBuilderContract;
+use MoonShine\Laravel\Fields\Relationships\BelongsToMany;
 use MoonShine\Laravel\Pages\Crud\FormPage;
 use MoonShine\UI\Components\Layout\Box;
 use MoonShine\UI\Components\Tabs;
@@ -48,6 +54,38 @@ final class MenuPositionFormPage extends FormPage
                         Textarea::make(__('moonshine-pages::moonshine-pages.menu_position.fields.description'), 'description')
                             ->customAttributes(['rows' => 2]),
                     ]),
+                    Tab::make(__('moonshine-pages::moonshine-pages.menu_position.tabs.menus'), [
+                        BelongsToMany::make(
+                            __('moonshine-pages::moonshine-pages.menu_position.fields.menus_relation'),
+                            'menus',
+                            static function (Model $menu): string {
+                                if (! $menu instanceof Menu) {
+                                    return (string) $menu->getAttribute('name');
+                                }
+
+                                $activeLabel = $menu->is_active
+                                    ? __('moonshine-pages::moonshine-pages.common.yes')
+                                    : __('moonshine-pages::moonshine-pages.common.no');
+
+                                $typeLabel = match ($menu->source_type) {
+                                    'link' => __('moonshine-pages::moonshine-pages.menu.source_types.link'),
+                                    'page' => __('moonshine-pages::moonshine-pages.menu.source_types.page'),
+                                    'route' => __('moonshine-pages::moonshine-pages.menu.source_types.route'),
+                                    default => (string) $menu->source_type,
+                                };
+
+                                return sprintf('%s — %s — %s', $menu->name, $activeLabel, $typeLabel);
+                            },
+                            MenuResource::class,
+                        )
+                            ->asyncSearch()
+                            ->modifyTable(static function (TableBuilderContract $table): TableBuilderContract {
+                                return $table
+                                    ->columnSelection()
+                                    ->searchable()
+                                    ->queryParamPrefix('menu_position_menus');
+                            }),
+                    ]),
                 ]),
             ]),
         ];
@@ -56,10 +94,17 @@ final class MenuPositionFormPage extends FormPage
     protected function rules(DataWrapperContract $item): array
     {
         $id = $item->getKey();
+        $normalizedId = is_numeric($id) ? (int) $id : null;
+
+        $codeUniqueRule = Rule::unique(MoonShinePagesTables::menuPositions(), 'code');
+
+        if ($normalizedId !== null) {
+            $codeUniqueRule->ignore($normalizedId);
+        }
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'code' => ['required', 'string', 'max:100', 'unique:'.MoonShinePagesTables::menuPositions().',code,'.$id],
+            'code' => ['required', 'string', 'max:100', $codeUniqueRule],
             'description' => ['nullable', 'string'],
             'sort_order' => ['integer'],
         ];

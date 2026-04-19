@@ -93,6 +93,6 @@ class PageResource extends ModelResource
 
     protected function search(): array
     {
-        return ['id', 'title', 'slug'];
+        return ['id', 'title', 'slug', 'seo_title'];
     }
 }

@@ -8,6 +8,8 @@ return [
     ],
     'common' => [
         'is_active' => 'Active',
+        'yes' => 'Yes',
+        'no' => 'No',
         'sort_order' => 'Sort order',
         'created_at' => 'Created at',
         'updated_at' => 'Updated at',
@@ -42,10 +44,14 @@ return [
     ],
     'menu_position' => [
         'resource_title' => 'Menu positions',
+        'tabs' => [
+            'menus' => 'Menus',
+        ],
         'fields' => [
             'name' => 'Name',
             'code' => 'Code',
             'description' => 'Description',
+            'menus_relation' => 'Menu items',
         ],
         'hints' => [
             'code' => 'For example: main, footer',

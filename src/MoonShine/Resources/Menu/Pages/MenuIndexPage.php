@@ -7,25 +7,25 @@ namespace MB\MoonShine\MoonShine\Resources\Menu\Pages;
 use Illuminate\Database\Eloquent\Model;
 use MB\MoonShine\MoonShine\Resources\Menu\MenuResource;
 use MB\MoonShine\MoonShine\Resources\MenuPosition\MenuPositionResource;
+use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Laravel\Fields\Relationships\BelongsToMany;
 use MoonShine\Laravel\Pages\Crud\IndexPage;
 use MoonShine\UI\Components\Badge;
 use MoonShine\UI\Components\Link;
+use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Number;
+use MoonShine\UI\Fields\Select;
 use MoonShine\UI\Fields\Switcher;
 use MoonShine\UI\Fields\Text;
-use MoonShine\UI\Fields\Select;
 
 /**
  * @extends IndexPage<MenuResource>
  */
 final class MenuIndexPage extends IndexPage
 {
-    protected bool $isColumnSelection = true;
-
     /**
      * @return list<FieldContract>
      */
@@ -56,10 +56,20 @@ final class MenuIndexPage extends IndexPage
         ];
     }
 
+    protected function modifyListComponent(ComponentContract $component): ComponentContract
+    {
+        if ($component instanceof TableBuilder) {
+            return $component->columnSelection();
+        }
+
+        return $component;
+    }
+
     protected function filters(): iterable
     {
         return [
             Text::make(__('moonshine-pages::moonshine-pages.menu.fields.name'), 'name'),
+            Text::make(__('moonshine-pages::moonshine-pages.menu.fields.source_value'), 'source_value'),
             BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
                 ->selectMode()
                 ->searchable(),
@@ -70,6 +80,7 @@ final class MenuIndexPage extends IndexPage
                     'route' => __('moonshine-pages::moonshine-pages.menu.source_types.route'),
                 ]),
             Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active'),
+            Number::make(__('moonshine-pages::moonshine-pages.common.sort_order'), 'sort_order'),
         ];
     }
 }

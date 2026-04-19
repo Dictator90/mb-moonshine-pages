@@ -8,6 +8,8 @@ return [
     ],
     'common' => [
         'is_active' => 'Активен',
+        'yes' => 'Да',
+        'no' => 'Нет',
         'sort_order' => 'Порядок',
         'created_at' => 'Создано',
         'updated_at' => 'Обновлено',
@@ -42,10 +44,14 @@ return [
     ],
     'menu_position' => [
         'resource_title' => 'Позиции меню',
+        'tabs' => [
+            'menus' => 'Меню',
+        ],
         'fields' => [
             'name' => 'Название',
             'code' => 'Код',
             'description' => 'Описание',
+            'menus_relation' => 'Пункты меню',
         ],
         'hints' => [
             'code' => 'Например: main, footer',
