@@ -22,6 +22,7 @@ return [
         'resource_title' => 'Меню',
         'fields' => [
             'name' => 'Название',
+            'image' => 'Изображение',
             'positions' => 'Позиции',
             'source_type' => 'Источник',
             'link' => 'Ссылка',
@@ -40,6 +41,7 @@ return [
         'hints' => [
             'link' => 'Полный или относительный URL',
             'route_parameter' => 'Введите значение для placeholder маршрута',
+            'image' => 'Необязательная иконка или миниатюра для пункта меню',
         ],
     ],
     'menu_position' => [

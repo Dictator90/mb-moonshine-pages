@@ -23,6 +23,7 @@ class Menu extends Model
 
     protected $fillable = [
         'name',
+        'image',
         'menu_position_id',
         'is_active',
         'source_type',

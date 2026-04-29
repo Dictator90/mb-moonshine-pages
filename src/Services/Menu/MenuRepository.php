@@ -103,6 +103,7 @@ class MenuRepository
             $branch[] = [
                 'id' => $item->id,
                 'name' => $item->name,
+                'image' => $item->image,
                 'url' => $item->url,
                 'code' => $item->positions->pluck('code')->first(),
                 'target' => $item->target,

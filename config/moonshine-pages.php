@@ -6,6 +6,9 @@ use MB\MoonShine\Http\Controllers\PageShowController;
 use MB\MoonShine\Models\Menu;
 use MB\MoonShine\Models\MenuPosition;
 use MB\MoonShine\Models\Page;
+use MB\MoonShine\MoonShine\Resources\Menu\MenuResource;
+use MB\MoonShine\MoonShine\Resources\MenuPosition\MenuPositionResource;
+use MB\MoonShine\MoonShine\Resources\Page\PageResource;
 
 return [
     /*
@@ -64,6 +67,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | MoonShine resources
+    |--------------------------------------------------------------------------
+    |
+    | Override the MoonShine resource classes registered by this package.
+    | Custom classes must extend (or be compatible with) the originals.
+    |
+    */
+    'resources' => [
+        'menu' => MenuResource::class,
+        'menu_position' => MenuPositionResource::class,
+        'page' => PageResource::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Route settings
     |--------------------------------------------------------------------------
     |
@@ -99,5 +117,19 @@ return [
     */
     'moonshine' => [
         'register_menu_items' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Media (file uploads)
+    |--------------------------------------------------------------------------
+    |
+    | disk: defaults to the MoonShine panel disk (moonshine.disk).
+    | Per-resource upload directories are listed under 'resources'.
+    |
+    */
+    'media' => [
+        'disk' => null, // null = inherit moonshine.disk
+        'image_dir' => 'menu',
     ],
 ];

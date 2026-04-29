@@ -15,6 +15,7 @@ use MoonShine\Laravel\Pages\Crud\DetailPage;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\ID;
+use MoonShine\UI\Fields\Image;
 use MoonShine\UI\Fields\Number;
 use MoonShine\UI\Fields\Preview;
 use MoonShine\UI\Fields\Select;
@@ -56,6 +57,10 @@ class MenuResource extends ModelResource
             Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active'),
 
             Text::make(__('moonshine-pages::moonshine-pages.menu.fields.name'), 'name'),
+
+            Image::make(__('moonshine-pages::moonshine-pages.menu.fields.image'), 'image')
+                ->disk($this->mediaDisk())
+                ->dir($this->mediaDir()),
 
             BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
                 ->selectMode(),
@@ -118,6 +123,10 @@ class MenuResource extends ModelResource
             Text::make(__('moonshine-pages::moonshine-pages.menu.fields.name'), 'name')
                 ->required(),
 
+            Image::make(__('moonshine-pages::moonshine-pages.menu.fields.image'), 'image')
+                ->disk($this->mediaDisk())
+                ->dir($this->mediaDir()),
+
             BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
                 ->selectMode()
                 ->searchable(),
@@ -138,5 +147,19 @@ class MenuResource extends ModelResource
     protected function search(): array
     {
         return ['id', 'name', 'source_type'];
+    }
+
+    private function mediaDisk(): string
+    {
+        $disk = config('moonshine-pages.media.disk');
+
+        return is_string($disk) && $disk !== ''
+            ? $disk
+            : (string) config('moonshine.disk', 'public');
+    }
+
+    private function mediaDir(): string
+    {
+        return (string) config('moonshine-pages.media.image_dir', 'menu');
     }
 }

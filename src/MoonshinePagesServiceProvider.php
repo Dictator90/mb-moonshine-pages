@@ -52,20 +52,35 @@ class MoonshinePagesServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../resources/views' => resource_path('views/vendor/moonshine-pages'),
             ], 'moonshine-pages-views');
+
+            $this->publishes([
+                __DIR__.'/../lang' => lang_path('vendor/moonshine-pages'),
+            ], 'moonshine-pages-lang');
+
+            $this->publishes([
+                __DIR__.'/../lang' => resource_path('lang/vendor/moonshine-pages'),
+            ], 'moonshine-pages-translations');
         }
 
+        /** @var class-string $menuResourceClass */
+        $menuResourceClass = (string) config('moonshine-pages.resources.menu', MenuResource::class);
+        /** @var class-string $menuPositionResourceClass */
+        $menuPositionResourceClass = (string) config('moonshine-pages.resources.menu_position', MenuPositionResource::class);
+        /** @var class-string $pageResourceClass */
+        $pageResourceClass = (string) config('moonshine-pages.resources.page', PageResource::class);
+
         $core->resources([
-            PageResource::class,
-            MenuPositionResource::class,
-            MenuResource::class,
+            $pageResourceClass,
+            $menuPositionResourceClass,
+            $menuResourceClass,
         ]);
 
         if (config('moonshine-pages.moonshine.register_menu_items', true)) {
             $menu->add([
                 MenuGroup::make(__('moonshine-pages::moonshine-pages.menu_group.content'), [
-                    MenuItem::make(MenuResource::class, __('moonshine-pages::moonshine-pages.menu.resource_title'), 'list-bullet'),
-                    MenuItem::make(MenuPositionResource::class, __('moonshine-pages::moonshine-pages.menu_position.resource_title'), 'view-columns'),
-                    MenuItem::make(PageResource::class, __('moonshine-pages::moonshine-pages.page.resource_title'), 'document-text'),
+                    MenuItem::make($menuResourceClass, __('moonshine-pages::moonshine-pages.menu.resource_title'), 'list-bullet'),
+                    MenuItem::make($menuPositionResourceClass, __('moonshine-pages::moonshine-pages.menu_position.resource_title'), 'view-columns'),
+                    MenuItem::make($pageResourceClass, __('moonshine-pages::moonshine-pages.page.resource_title'), 'document-text'),
                 ], 'rectangle-stack'),
             ]);
         }

@@ -24,6 +24,7 @@ use MoonShine\UI\Components\Tabs;
 use MoonShine\UI\Components\Tabs\Tab;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\ID;
+use MoonShine\UI\Fields\Image;
 use MoonShine\UI\Fields\Number;
 use MoonShine\UI\Fields\Select;
 use MoonShine\UI\Fields\Switcher;
@@ -59,6 +60,12 @@ final class MenuFormPage extends FormPage
 
                         Text::make(__('moonshine-pages::moonshine-pages.menu.fields.name'), 'name')
                             ->required(),
+
+                        Image::make(__('moonshine-pages::moonshine-pages.menu.fields.image'), 'image')
+                            ->disk($this->resolveMediaDisk())
+                            ->dir($this->resolveMediaDir())
+                            ->removable()
+                            ->hint(__('moonshine-pages::moonshine-pages.menu.hints.image')),
 
                         BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
                             ->selectMode()
@@ -136,6 +143,7 @@ final class MenuFormPage extends FormPage
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
+            'image' => ['nullable'],
             'is_active' => ['boolean'],
             'sort_order' => ['integer'],
             'source_type' => ['required', 'string', 'in:link,page,route'],
@@ -341,6 +349,20 @@ final class MenuFormPage extends FormPage
         ksort($parametersToRoutesMap);
 
         return $parametersToRoutesMap;
+    }
+
+    private function resolveMediaDisk(): string
+    {
+        $disk = config('moonshine-pages.media.disk');
+
+        return is_string($disk) && $disk !== ''
+            ? $disk
+            : (string) config('moonshine.disk', 'public');
+    }
+
+    private function resolveMediaDir(): string
+    {
+        return (string) config('moonshine-pages.media.image_dir', 'menu');
     }
 
     /**

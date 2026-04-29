@@ -22,6 +22,7 @@ return [
         'resource_title' => 'Menu',
         'fields' => [
             'name' => 'Name',
+            'image' => 'Image',
             'positions' => 'Positions',
             'source_type' => 'Source',
             'link' => 'Link',
@@ -40,6 +41,7 @@ return [
         'hints' => [
             'link' => 'Full or relative URL',
             'route_parameter' => 'Enter value for route placeholder',
+            'image' => 'Optional icon or thumbnail for the menu item',
         ],
     ],
     'menu_position' => [
