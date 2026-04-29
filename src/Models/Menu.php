@@ -94,6 +94,7 @@ class Menu extends Model
         $routeParams = $this->normalizeRouteParams($this->route_params);
 
         return match ($this->source_type) {
+            'none' => '#',
             'page' => $this->page && $this->page->is_active
                 ? route($pageRouteName, $this->page->slug)
                 : '#',

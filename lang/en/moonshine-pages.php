@@ -34,6 +34,7 @@ return [
             'parent' => 'Parent',
         ],
         'source_types' => [
+            'none' => 'No source',
             'link' => 'Link',
             'page' => 'Page',
             'route' => 'Route',

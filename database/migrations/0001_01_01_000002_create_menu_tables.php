@@ -22,6 +22,7 @@ return new class extends Migration
                 $blueprint->string('code')->unique();
                 $blueprint->integer('sort_order')->default(0);
                 $blueprint->text('description')->nullable();
+                $blueprint->string('image')->nullable();
                 $blueprint->timestamps();
 
                 $blueprint->index('sort_order');

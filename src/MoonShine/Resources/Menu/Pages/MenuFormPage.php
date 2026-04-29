@@ -76,11 +76,12 @@ final class MenuFormPage extends FormPage
 
                         Select::make(__('moonshine-pages::moonshine-pages.menu.fields.source_type'), 'source_type')
                             ->options([
+                                'none' => __('moonshine-pages::moonshine-pages.menu.source_types.none'),
                                 'link' => __('moonshine-pages::moonshine-pages.menu.source_types.link'),
                                 'page' => __('moonshine-pages::moonshine-pages.menu.source_types.page'),
                                 'route' => __('moonshine-pages::moonshine-pages.menu.source_types.route'),
                             ])
-                            ->default('link')
+                            ->default('none')
                             ->required()
                             ->mergeAttribute(
                                 'x-on:change',
@@ -146,7 +147,7 @@ final class MenuFormPage extends FormPage
             'image' => ['nullable'],
             'is_active' => ['boolean'],
             'sort_order' => ['integer'],
-            'source_type' => ['required', 'string', 'in:link,page,route'],
+            'source_type' => ['required', 'string', 'in:none,link,page,route'],
             'link' => ['nullable', 'string', 'max:255'],
             'route' => ['nullable', 'string', 'max:255'],
             'source_value' => ['nullable', 'string', 'max:255'],

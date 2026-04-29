@@ -70,6 +70,7 @@ class MenuResource extends ModelResource
             Preview::make(__('moonshine-pages::moonshine-pages.menu.fields.source_type'), 'source_type')
                 ->changePreview(function (mixed $value): string {
                     return match ($value) {
+                        'none' => __('moonshine-pages::moonshine-pages.menu.source_types.none'),
                         'link' => __('moonshine-pages::moonshine-pages.menu.source_types.link'),
                         'page' => __('moonshine-pages::moonshine-pages.menu.source_types.page'),
                         'route' => __('moonshine-pages::moonshine-pages.menu.source_types.route'),
@@ -133,6 +134,7 @@ class MenuResource extends ModelResource
 
             Select::make(__('moonshine-pages::moonshine-pages.menu.fields.source_type'), 'source_type')
                 ->options([
+                    'none' => __('moonshine-pages::moonshine-pages.menu.source_types.none'),
                     'link' => __('moonshine-pages::moonshine-pages.menu.source_types.link'),
                     'page' => __('moonshine-pages::moonshine-pages.menu.source_types.page'),
                     'route' => __('moonshine-pages::moonshine-pages.menu.source_types.route'),
