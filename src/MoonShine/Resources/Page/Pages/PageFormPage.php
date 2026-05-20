@@ -27,7 +27,7 @@ use MoonShine\UI\Fields\Textarea;
 /**
  * @extends FormPage<PageResource>
  */
-final class PageFormPage extends FormPage
+class PageFormPage extends FormPage
 {
     /**
      * @return list<ComponentContract|FieldContract>

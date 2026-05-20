@@ -24,7 +24,7 @@ use MoonShine\UI\Fields\Text;
 /**
  * @extends IndexPage<MenuResource>
  */
-final class MenuIndexPage extends IndexPage
+class MenuIndexPage extends IndexPage
 {
     /**
      * @return list<FieldContract>

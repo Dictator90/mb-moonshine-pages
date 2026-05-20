@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-05-20
+
+### Fixed
+- `MenuFormPage` now uses async `BelongsToMany` search for menu positions so the positions list is loaded through the relation endpoint and can be selected reliably by name/code.
+- `MenuPositionFormPage` now uses async `BelongsToMany` select mode without child resource fields for menus, so the tab no longer submits nested menu fields that could overwrite the position name with `0`.
+- Remove `final` from Resources Pages.
+
+### Removed
+- migration `0001_01_01_000003_add_image_to_menus_table.php`
+
 ## [1.0.4] - 2026-04-29
 
 ### Added

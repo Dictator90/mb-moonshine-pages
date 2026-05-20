@@ -20,7 +20,7 @@ use MoonShine\UI\Fields\Text;
 /**
  * @extends IndexPage<PageResource>
  */
-final class PageIndexPage extends IndexPage
+class PageIndexPage extends IndexPage
 {
     /**
      * @return list<FieldContract>

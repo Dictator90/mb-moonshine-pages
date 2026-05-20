@@ -18,7 +18,7 @@ use MoonShine\UI\Fields\Textarea;
 /**
  * @extends IndexPage<MenuPositionResource>
  */
-final class MenuPositionIndexPage extends IndexPage
+class MenuPositionIndexPage extends IndexPage
 {
     /**
      * @return list<FieldContract>

@@ -13,7 +13,7 @@ use MoonShine\Support\ListOf;
 /**
  * @extends DetailPage<PageResource>
  */
-final class PageDetailPage extends DetailPage
+class PageDetailPage extends DetailPage
 {
     /**
      * @return ListOf<ActionButtonContract>

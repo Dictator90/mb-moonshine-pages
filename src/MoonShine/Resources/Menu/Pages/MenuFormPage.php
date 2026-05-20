@@ -33,7 +33,7 @@ use MoonShine\UI\Fields\Text;
 /**
  * @extends FormPage<MenuResource>
  */
-final class MenuFormPage extends FormPage
+class MenuFormPage extends FormPage
 {
     /**
      * @return list<ComponentContract|FieldContract>
@@ -68,8 +68,10 @@ final class MenuFormPage extends FormPage
                             ->hint(__('moonshine-pages::moonshine-pages.menu.hints.image')),
 
                         BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
+                            ->asyncSearch()
                             ->selectMode()
-                            ->searchable(),
+                            ->searchable()
+                            ->fields([]),
 
                         Number::make(__('moonshine-pages::moonshine-pages.common.sort_order'), 'sort_order')
                             ->default(0),

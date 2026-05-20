@@ -13,7 +13,6 @@ use Illuminate\Validation\Rule;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
-use MoonShine\Contracts\UI\TableBuilderContract;
 use MoonShine\Laravel\Fields\Relationships\BelongsToMany;
 use MoonShine\Laravel\Pages\Crud\FormPage;
 use MoonShine\UI\Components\Layout\Box;
@@ -27,7 +26,7 @@ use MoonShine\UI\Fields\Textarea;
 /**
  * @extends FormPage<MenuPositionResource>
  */
-final class MenuPositionFormPage extends FormPage
+class MenuPositionFormPage extends FormPage
 {
     /**
      * @return list<ComponentContract|FieldContract>
@@ -79,12 +78,9 @@ final class MenuPositionFormPage extends FormPage
                             MenuResource::class,
                         )
                             ->asyncSearch()
-                            ->modifyTable(static function (TableBuilderContract $table): TableBuilderContract {
-                                return $table
-                                    ->columnSelection()
-                                    ->searchable()
-                                    ->queryParamPrefix('menu_position_menus');
-                            }),
+                            ->selectMode()
+                            ->searchable()
+                            ->fields([]),
                     ]),
                 ]),
             ]),
