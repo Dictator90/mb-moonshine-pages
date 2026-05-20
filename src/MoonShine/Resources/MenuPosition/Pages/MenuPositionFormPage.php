@@ -73,7 +73,7 @@ class MenuPositionFormPage extends FormPage
                                     default => (string) $menu->source_type,
                                 };
 
-                                return sprintf('%s — %s — %s', $menu->name, $activeLabel, $typeLabel);
+                                return sprintf('%s — %s — %s', $menu->name, $typeLabel, $activeLabel,);
                             },
                             MenuResource::class,
                         )

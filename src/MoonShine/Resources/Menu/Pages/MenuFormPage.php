@@ -68,6 +68,7 @@ class MenuFormPage extends FormPage
                             ->hint(__('moonshine-pages::moonshine-pages.menu.hints.image')),
 
                         BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
+                            ->asyncOnInit()
                             ->asyncSearch()
                             ->selectMode()
                             ->searchable()
@@ -146,7 +147,7 @@ class MenuFormPage extends FormPage
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'image' => ['nullable'],
+            'image' => ['nullable', 'file'],
             'is_active' => ['boolean'],
             'sort_order' => ['integer'],
             'source_type' => ['required', 'string', 'in:none,link,page,route'],
