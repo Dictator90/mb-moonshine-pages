@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MB\MoonShine\MoonShine\Resources\Page\Pages;
 
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use MB\MoonShine\MoonShine\Resources\Page\PagePublicActionButton;
 use MB\MoonShine\MoonShine\Resources\Page\PageResource;
 use MB\MoonShine\Support\MoonShinePagesTables;
@@ -86,11 +87,17 @@ class PageFormPage extends FormPage
 
     protected function rules(DataWrapperContract $item): array
     {
+        $slugUnique = Rule::unique(MoonShinePagesTables::pages(), 'slug');
+
         $id = $item->getKey();
+
+        if ($id !== null && $id !== '') {
+            $slugUnique = $slugUnique->ignore($id);
+        }
 
         return [
             'title' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', 'unique:'.MoonShinePagesTables::pages().',slug,'.$id],
+            'slug' => ['required', 'string', 'max:255', $slugUnique],
             'content' => ['required', 'string'],
             'is_active' => ['boolean'],
             'seo_title' => ['nullable', 'string', 'max:255'],
