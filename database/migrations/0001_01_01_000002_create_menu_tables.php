@@ -22,7 +22,6 @@ return new class extends Migration
                 $blueprint->string('code')->unique();
                 $blueprint->integer('sort_order')->default(0);
                 $blueprint->text('description')->nullable();
-                $blueprint->string('image')->nullable();
                 $blueprint->timestamps();
 
                 $blueprint->index('sort_order');
@@ -34,6 +33,7 @@ return new class extends Migration
                 $blueprint->id();
                 $blueprint->boolean('is_active')->default(true);
                 $blueprint->string('name');
+                $blueprint->string('image')->nullable();
                 $blueprint->integer('sort_order')->default(0);
                 $blueprint->string('source_type', 50)->default('link');
                 $blueprint->string('source_value')->nullable();
