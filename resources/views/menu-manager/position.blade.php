@@ -21,7 +21,7 @@
         <button type="button" class="btn btn-sm btn-primary" @click="mmOpenForm(@js($createUrl))">
             {{ __('moonshine-pages::moonshine-pages.menu_manager.create_item') }}
         </button>
-        <button type="button" class="btn btn-sm" @click="modalOpen = true">
+        <button type="button" class="btn btn-sm" @click="window.MoonShine.ui.toggleModal('mm-add-{{ $positionId }}')">
             {{ __('moonshine-pages::moonshine-pages.menu_manager.add_existing') }}
         </button>
     </div>
@@ -56,90 +56,73 @@
         @endforeach
     </div>
 
-    {{-- ── add-from-existing modal ── --}}
-    <div
-        x-show="modalOpen"
-        x-cloak
-        class="mmgr-modal-overlay"
-        @click.self="close()"
-        @keydown.escape.window="close()"
+    {{-- ── add-from-existing modal (native MoonShine modal; the slot keeps the
+         menuAdd Alpine scope through x-teleport) ── --}}
+    <x-moonshine::modal
+        name="mm-add-{{ $positionId }}"
+        :title="__('moonshine-pages::moonshine-pages.menu_manager.modal.title')"
     >
-        <div class="mmgr-modal-panel">
-            {{-- modal header --}}
-            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
-                <span class="text-base font-bold">{{ __('moonshine-pages::moonshine-pages.menu_manager.modal.title') }}</span>
-                <button type="button" class="btn-fit text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" @click="close()">
-                    <x-moonshine::icon icon="x-mark" size="5" />
-                </button>
+        {{-- search --}}
+        <div class="mmgr-add-search">
+            <x-moonshine::icon icon="magnifying-glass" size="4" />
+            <input
+                type="text"
+                x-model="search"
+                placeholder="{{ __('moonshine-pages::moonshine-pages.menu_manager.modal.search') }}"
+            >
+        </div>
+
+        {{-- list --}}
+        <div class="mmgr-add-list">
+            <div class="mmgr-add-grouplabel">
+                {{ __('moonshine-pages::moonshine-pages.menu_manager.modal.available') }}
             </div>
 
-            {{-- search --}}
-            <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 shrink-0">
-                <div class="flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 px-3 py-2">
-                    <x-moonshine::icon icon="magnifying-glass" size="4" class="text-gray-400 dark:text-gray-500" />
-                    <input
-                        type="text"
-                        x-model="search"
-                        placeholder="{{ __('moonshine-pages::moonshine-pages.menu_manager.modal.search') }}"
-                        class="flex-1 bg-transparent border-0 outline-none text-sm p-0 focus:ring-0"
-                    >
-                </div>
-            </div>
-
-            {{-- list --}}
-            <div class="mmgr-modal-body px-5 py-3 flex flex-col gap-1">
-                <div class="text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500 py-1">
-                    {{ __('moonshine-pages::moonshine-pages.menu_manager.modal.available') }}
-                </div>
-
-                <template x-for="row in filtered" :key="row.id">
-                    <label
-                        class="flex items-center gap-3 px-2 py-2 rounded-lg"
-                        :class="row.already
-                            ? 'opacity-45 cursor-not-allowed'
-                            : 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700'"
-                    >
-                        <input
-                            type="checkbox"
-                            class="shrink-0"
-                            :value="row.id"
-                            :disabled="row.already"
-                            x-model.number="selected"
-                        >
-                        <span class="flex-1 min-w-0 truncate text-sm font-semibold" x-text="row.name"></span>
-                        <span class="badge shrink-0" :class="'badge-' + row.source_color" x-text="row.source_label"></span>
-                        <template x-if="row.already">
-                            <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">{{ __('moonshine-pages::moonshine-pages.menu_manager.modal.already') }}</span>
-                        </template>
-                        <template x-if="!row.already">
-                            <span class="text-xs shrink-0" :class="row.is_active ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'">
-                                <span x-show="row.is_active">&#9679; {{ __('moonshine-pages::moonshine-pages.menu_manager.status.active') }}</span>
-                                <span x-show="!row.is_active">&#9675; {{ __('moonshine-pages::moonshine-pages.menu_manager.status.hidden') }}</span>
-                            </span>
-                        </template>
-                    </label>
-                </template>
-
-                <div x-show="filtered.length === 0" class="px-2 py-4 text-center text-sm text-gray-400 dark:text-gray-500">
-                    {{ __('moonshine-pages::moonshine-pages.menu_manager.modal.empty') }}
-                </div>
-            </div>
-
-            {{-- modal footer --}}
-            <div class="flex items-center justify-end gap-3 px-5 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 shrink-0">
-                <button type="button" class="btn" @click="close()">
-                    {{ __('moonshine-pages::moonshine-pages.menu_manager.modal.cancel') }}
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    :disabled="selected.length === 0"
-                    :class="selected.length === 0 ? 'opacity-50 cursor-not-allowed' : ''"
-                    @click="submit()"
+            <template x-for="row in filtered" :key="row.id">
+                <label
+                    class="mmgr-add-row"
+                    :class="row.already ? 'mmgr-add-row--off' : 'mmgr-add-row--on'"
                 >
-                    {{ __('moonshine-pages::moonshine-pages.menu_manager.modal.add_selected') }} (<span x-text="selected.length"></span>)
-                </button>
+                    <input
+                        type="checkbox"
+                        class="shrink-0"
+                        :value="row.id"
+                        :disabled="row.already"
+                        x-model.number="selected"
+                    >
+                    <span class="mmgr-add-name" x-text="row.name"></span>
+                    <span class="badge shrink-0" :class="'badge-' + row.source_color" x-text="row.source_label"></span>
+                    <template x-if="row.already">
+                        <span class="mmgr-add-meta">{{ __('moonshine-pages::moonshine-pages.menu_manager.modal.already') }}</span>
+                    </template>
+                    <template x-if="!row.already">
+                        <span class="mmgr-add-meta" :class="row.is_active ? 'mmgr-add-meta--on' : ''">
+                            <span x-show="row.is_active">&#9679; {{ __('moonshine-pages::moonshine-pages.menu_manager.status.active') }}</span>
+                            <span x-show="!row.is_active">&#9675; {{ __('moonshine-pages::moonshine-pages.menu_manager.status.hidden') }}</span>
+                        </span>
+                    </template>
+                </label>
+            </template>
+
+            <div x-show="filtered.length === 0" class="mmgr-add-empty">
+                {{ __('moonshine-pages::moonshine-pages.menu_manager.modal.empty') }}
             </div>
         </div>
-    </div>
+
+        {{-- footer --}}
+        <div class="mmgr-add-foot">
+            <button type="button" class="btn" @click="toggleModal">
+                {{ __('moonshine-pages::moonshine-pages.menu_manager.modal.cancel') }}
+            </button>
+            <button
+                type="button"
+                class="btn btn-primary"
+                :disabled="selected.length === 0"
+                :class="selected.length === 0 ? 'opacity-50 cursor-not-allowed' : ''"
+                @click="submit()"
+            >
+                {{ __('moonshine-pages::moonshine-pages.menu_manager.modal.add_selected') }} (<span x-text="selected.length"></span>)
+            </button>
+        </div>
+    </x-moonshine::modal>
 </div>

@@ -294,12 +294,23 @@ final class MenuManagerPage extends Page
     {
         return [
             'title' => $this->getTitle(),
-            'positions' => array_map(
-                fn (array $position): array => $this->positionViewData($position),
-                $this->service()->positions()
-            ),
+            'positions' => $this->positionsData(),
             'createUrl' => $this->formFragmentUrl($this->resource()),
         ];
+    }
+
+    /**
+     * The per-position view-data sets, shared by the full page and the in-place
+     * tree re-render.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function positionsData(): array
+    {
+        return array_map(
+            fn (array $position): array => $this->positionViewData($position),
+            $this->service()->positions()
+        );
     }
 
     /**

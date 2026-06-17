@@ -171,21 +171,59 @@ final class MenuManagerService
     }
 
     /**
-     * Human-readable target shown in the URL/route column.
+     * The final link shown in the URL/route column. For `page` and `route` we
+     * reuse {@see Menu::getUrlAttribute()} so the displayed link reflects exactly
+     * how the frontend resolves it — i.e. the menu item's own slug prepended when
+     * `prepend_menu_slug` is on, and route parameters substituted into the path.
+     * When the target can't be resolved (inactive page / unknown route) we fall
+     * back to a readable hint (the route name or the page slug).
      */
     private function targetDisplay(Menu|Model $menu): string
     {
         $type = (string) $menu->getAttribute('source_type');
         $value = $menu->getAttribute('source_value');
+        $rawValue = is_string($value) && $value !== '' ? $value : null;
 
+        if ($type === 'link') {
+            return $rawValue ?? '—';
+        }
+
+        if ($type === 'none') {
+            return '—';
+        }
+
+        // page / route: resolve through the model's own URL accessor.
+        $url = (string) $menu->getAttribute('url');
+
+        if ($url !== '' && $url !== '#') {
+            return $this->toDisplayPath($url);
+        }
+
+        // Unresolvable: show a hint rather than a dead '#'.
         return match ($type) {
-            'link' => is_string($value) && $value !== '' ? $value : '—',
-            'route' => is_string($value) && $value !== '' ? $value : '—',
+            'route' => $rawValue ?? '—',
             'page' => $menu->page !== null && $menu->page->slug !== null
                 ? '/'.ltrim((string) $menu->page->slug, '/')
                 : '—',
             default => '—',
         };
+    }
+
+    /**
+     * Trim an absolute URL to its path (+ query) for a compact column; relative
+     * values pass through unchanged.
+     */
+    private function toDisplayPath(string $url): string
+    {
+        $path = parse_url($url, PHP_URL_PATH);
+
+        if (! is_string($path) || $path === '') {
+            return $url;
+        }
+
+        $query = parse_url($url, PHP_URL_QUERY);
+
+        return $path.(is_string($query) && $query !== '' ? '?'.$query : '');
     }
 
     private function iconUrl(Menu|Model $menu): ?string

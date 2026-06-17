@@ -8,27 +8,8 @@
 --}}
 @php $firstTab = $positions[0]['position']['id'] ?? null; @endphp
 <div class="mmgr" x-data="{ tab: @js($firstTab) }">
-    @if(empty($positions))
-        <div class="box"><div class="mmgr-empty">{{ __('moonshine-pages::moonshine-pages.menu_manager.empty') }}</div></div>
-    @else
-        {{-- Positions rendered as tabs; only the active position's panel is shown. --}}
-        <div class="mmgr-tabs">
-            @foreach($positions as $section)
-                <button
-                    type="button"
-                    class="mmgr-tab"
-                    :class="tab === {{ $section['position']['id'] }} ? 'mmgr-tab--active' : ''"
-                    @click="tab = {{ $section['position']['id'] }}"
-                >{{ $section['position']['name'] }}</button>
-            @endforeach
-        </div>
-
-        @foreach($positions as $section)
-            <div x-show="tab === {{ $section['position']['id'] }}" x-cloak>
-                @include('moonshine-pages::menu-manager.position', $section)
-            </div>
-        @endforeach
-    @endif
+    {{-- Tabbed positions tree. --}}
+    @include('moonshine-pages::menu-manager.tree', ['positions' => $positions])
 
     {{-- Shared async modal: hosts the reused Menu resource create/edit form,
          loaded on demand via window.MoonShine.ui.toggleModal('mm-form', url). --}}
@@ -142,20 +123,35 @@
     .mmgr-chosen > .mmgr-card { box-shadow: 0 6px 18px rgba(0, 0, 0, .14); }
     .mmgr-drag > .mmgr-card { transform: rotate(.5deg); }
 
-    /* ── Form/add modal (MoonShine ships only a precompiled CSS subset, so the
-         critical overlay/panel layout is defined explicitly, not via Tailwind) ── */
-    .mmgr-modal-overlay {
-        position: fixed; inset: 0; z-index: 9000;
-        display: flex; align-items: center; justify-content: center; padding: 1rem;
-        background: rgba(0, 0, 0, .6);
+    /* ── Add-from-existing list (rendered inside MoonShine's native modal, which
+         supplies the chrome; these only style the search box + candidate rows) ── */
+    .mmgr-add-search {
+        display: flex; align-items: center; gap: .5rem;
+        padding: .5rem .75rem; margin-bottom: .75rem;
+        border: 1px solid var(--mmgr-border); border-radius: .5rem;
+        background: var(--color-base-100); color: var(--mmgr-muted);
     }
-    .mmgr-modal-panel {
-        width: 100%; max-width: 32rem; max-height: 80vh;
-        display: flex; flex-direction: column; overflow: hidden;
-        border-radius: .75rem; box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
-        background: var(--color-base);
+    .mmgr-add-search input {
+        flex: 1; min-width: 0; background: transparent; border: 0; outline: none;
+        font-size: .875rem; padding: 0; color: var(--color-base-text);
     }
-    .mmgr-modal-body { flex: 1 1 auto; overflow-y: auto; }
+    .mmgr-add-list { display: flex; flex-direction: column; gap: .25rem; max-height: 50vh; overflow-y: auto; }
+    .mmgr-add-grouplabel {
+        font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+        color: var(--mmgr-muted); padding: .25rem 0;
+    }
+    .mmgr-add-row { display: flex; align-items: center; gap: .75rem; padding: .5rem; border-radius: .5rem; }
+    .mmgr-add-row--on { cursor: pointer; }
+    .mmgr-add-row--on:hover { background: var(--mmgr-card-hover); }
+    .mmgr-add-row--off { opacity: .45; cursor: not-allowed; }
+    .mmgr-add-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .875rem; font-weight: 600; }
+    .mmgr-add-meta { flex-shrink: 0; font-size: .72rem; color: var(--mmgr-muted); }
+    .mmgr-add-meta--on { color: var(--color-success-text); }
+    .mmgr-add-empty { padding: 1rem; text-align: center; font-size: .875rem; color: var(--mmgr-muted); }
+    .mmgr-add-foot {
+        display: flex; align-items: center; justify-content: flex-end; gap: .75rem;
+        margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--mmgr-border);
+    }
 </style>
 
 <script>
@@ -308,7 +304,6 @@
             position,
             attachUrl,
             available: available || [],
-            modalOpen: false,
             search: '',
             selected: [],
             loading: false,
@@ -319,12 +314,6 @@
                     return this.available;
                 }
                 return this.available.filter(row => (row.name || '').toLowerCase().includes(q));
-            },
-
-            close() {
-                this.modalOpen = false;
-                this.search = '';
-                this.selected = [];
             },
 
             submit() {

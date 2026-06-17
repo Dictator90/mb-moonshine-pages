@@ -163,6 +163,27 @@ final class MenuManagerPageTest extends TestCase
         $this->assertSame([], $positions[1]['items']);
     }
 
+    public function test_target_display_resolves_page_url_with_prepended_menu_slug(): void
+    {
+        $header = $this->position('header', 'Header');
+
+        $page = Page::query()->create(['title' => 'Item', 'slug' => 'item', 'is_active' => true, 'content' => '<p>x</p>']);
+
+        // prepend_menu_slug on + a menu slug => the shown link is /{menu_slug}/{page_slug}.
+        $menu = $this->menu([
+            'name' => 'Catalog item',
+            'source_type' => 'page',
+            'page_id' => $page->id,
+            'prepend_menu_slug' => true,
+            'slug' => 'catalog',
+        ]);
+        $this->place($menu, $header);
+
+        $node = $this->items(app(MenuManagerService::class)->positions(), 'header')[0];
+
+        $this->assertSame('/catalog/item', $node['target_display']);
+    }
+
     public function test_item_can_have_different_parents_in_different_positions(): void
     {
         $header = $this->position('header', 'Header', 0);
