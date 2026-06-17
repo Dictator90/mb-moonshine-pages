@@ -139,6 +139,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Menu resource
+    |--------------------------------------------------------------------------
+    |
+    | index_tree: render the Menu index as a hierarchical tree (ordered by
+    | parent_id, with indentation in the name column) instead of a flat
+    | paginated list. Pagination is disabled in tree mode so the whole
+    | hierarchy stays visible.
+    |
+    */
+    'menu' => [
+        'index_tree' => false,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | MoonShine menu integration
     |--------------------------------------------------------------------------
     |

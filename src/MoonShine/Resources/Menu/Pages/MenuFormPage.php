@@ -40,6 +40,8 @@ class MenuFormPage extends FormPage
      */
     protected function fields(): iterable
     {
+        $parentTree = $this->menuTreeMeta();
+
         return [
             Box::make([
                 Tabs::make([
@@ -133,17 +135,22 @@ class MenuFormPage extends FormPage
 
                         ...$this->getRouteParameterFields(),
 
-                        BelongsTo::make(__('moonshine-pages::moonshine-pages.menu.fields.parent'), 'parent', null, MenuResource::class)
+                        BelongsTo::make(
+                            __('moonshine-pages::moonshine-pages.menu.fields.parent'),
+                            'parent',
+                            static fn (Model $item): string => $parentTree['paths'][$item->getKey()] ?? (string) $item->name,
+                            MenuResource::class
+                        )
                             ->searchable()
                             ->nullable()
-                            ->valuesQuery(function (Builder $query, BelongsTo $field): Builder {
+                            ->valuesQuery(function (Builder $query, BelongsTo $field) use ($parentTree): Builder {
                                 $original = $field->getData()?->getOriginal();
 
                                 if ($original instanceof Model && $original->getKey() !== null) {
                                     $query->whereKeyNot($original->getKey());
                                 }
 
-                                return $query;
+                                return $this->applyTreeOrder($query, $parentTree['order']);
                             }),
                     ]),
                 ]),
@@ -385,6 +392,63 @@ class MenuFormPage extends FormPage
     private function resolveMediaDir(): string
     {
         return (string) config('moonshine-pages.media.image_dir', 'menu');
+    }
+
+    /**
+     * Precompute the menu hierarchy once for the parent select: a breadcrumb
+     * path map (key => "Root / Child / ...", for option labels that keep the
+     * full ancestry visible while searching) and a depth-first ordered list of
+     * keys (so options appear as a tree, parents before children).
+     *
+     * @return array{paths: array<array-key, string>, order: list<array-key>}
+     */
+    private function menuTreeMeta(): array
+    {
+        /** @var class-string<Model> $menuModel */
+        $menuModel = (string) config('moonshine-pages.models.menu', \MB\MoonShine\Models\Menu::class);
+
+        $ordered = MenuResource::orderAsTree(
+            $menuModel::query()->get(['id', 'parent_id', 'name', 'sort_order'])
+        );
+
+        $paths = [];
+        $order = [];
+
+        foreach ($ordered as $menu) {
+            $paths[$menu->getKey()] = (string) $menu->getAttribute('tree_path');
+            $order[] = $menu->getKey();
+        }
+
+        return ['paths' => $paths, 'order' => $order];
+    }
+
+    /**
+     * Order a query by an explicit key sequence (depth-first tree order) using a
+     * portable CASE expression so the parent select lists items as a tree.
+     *
+     * @param  list<array-key>  $order
+     */
+    private function applyTreeOrder(Builder $query, array $order): Builder
+    {
+        if ($order === []) {
+            return $query;
+        }
+
+        $keyName = $query->getModel()->getKeyName();
+
+        $cases = [];
+        $bindings = [];
+
+        foreach ($order as $position => $key) {
+            $cases[] = 'WHEN ? THEN ?';
+            $bindings[] = $key;
+            $bindings[] = $position;
+        }
+
+        return $query->orderByRaw(
+            'CASE '.$keyName.' '.implode(' ', $cases).' ELSE '.count($order).' END',
+            $bindings
+        );
     }
 
     /**
