@@ -6,6 +6,7 @@ use MB\MoonShine\Http\Controllers\PageShowController;
 use MB\MoonShine\Models\Menu;
 use MB\MoonShine\Models\MenuPosition;
 use MB\MoonShine\Models\Page;
+use MB\MoonShine\MoonShine\Pages\MenuManagerPage;
 use MB\MoonShine\MoonShine\Resources\Menu\MenuResource;
 use MB\MoonShine\MoonShine\Resources\MenuPosition\MenuPositionResource;
 use MB\MoonShine\MoonShine\Resources\Page\PageResource;
@@ -82,6 +83,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | MoonShine pages
+    |--------------------------------------------------------------------------
+    |
+    | Override the standalone MoonShine page classes registered by this package.
+    |
+    */
+    'pages' => [
+        'menu_manager' => MenuManagerPage::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Route settings
     |--------------------------------------------------------------------------
     |
@@ -150,6 +163,19 @@ return [
     */
     'menu' => [
         'index_tree' => false,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Menu manager page
+    |--------------------------------------------------------------------------
+    |
+    | enabled: register the standalone "Menu management" admin page (grouped by
+    | position, drag & drop within a position) and add it to the MoonShine menu.
+    |
+    */
+    'menu_manager' => [
+        'enabled' => true,
     ],
 
     /*

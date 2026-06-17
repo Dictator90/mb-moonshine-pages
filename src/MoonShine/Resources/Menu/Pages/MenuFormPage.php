@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace MB\MoonShine\MoonShine\Resources\Menu\Pages;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Route as IlluminateRoute;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Validation\Rule;
 use MB\MoonShine\MoonShine\Resources\Menu\MenuResource;
 use MB\MoonShine\MoonShine\Resources\MenuPosition\MenuPositionResource;
 use MB\MoonShine\MoonShine\Resources\Page\PageResource;
@@ -25,7 +22,6 @@ use MoonShine\UI\Components\Tabs\Tab;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Image;
-use MoonShine\UI\Fields\Number;
 use MoonShine\UI\Fields\Select;
 use MoonShine\UI\Fields\Switcher;
 use MoonShine\UI\Fields\Text;
@@ -40,8 +36,6 @@ class MenuFormPage extends FormPage
      */
     protected function fields(): iterable
     {
-        $parentTree = $this->menuTreeMeta();
-
         return [
             Box::make([
                 Tabs::make([
@@ -57,26 +51,11 @@ class MenuFormPage extends FormPage
                             ]),
                         ], justifyAlign: 'left'),
 
-                        Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active')
-                            ->default(true),
-
                         Text::make(__('moonshine-pages::moonshine-pages.menu.fields.name'), 'name')
                             ->required(),
 
-                        Image::make(__('moonshine-pages::moonshine-pages.menu.fields.image'), 'image')
-                            ->disk($this->resolveMediaDisk())
-                            ->dir($this->resolveMediaDir())
-                            ->removable()
-                            ->hint(__('moonshine-pages::moonshine-pages.menu.hints.image')),
-
-                        BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
-                            ->asyncSearch()
-                            ->selectMode()
-                            ->searchable()
-                            ->fields([]),
-
-                        Number::make(__('moonshine-pages::moonshine-pages.common.sort_order'), 'sort_order')
-                            ->default(0),
+                        Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active')
+                            ->default(true),
 
                         Select::make(__('moonshine-pages::moonshine-pages.menu.fields.source_type'), 'source_type')
                             ->options([
@@ -135,23 +114,18 @@ class MenuFormPage extends FormPage
 
                         ...$this->getRouteParameterFields(),
 
-                        BelongsTo::make(
-                            __('moonshine-pages::moonshine-pages.menu.fields.parent'),
-                            'parent',
-                            static fn (Model $item): string => $parentTree['paths'][$item->getKey()] ?? (string) $item->name,
-                            MenuResource::class
-                        )
+                        Image::make(__('moonshine-pages::moonshine-pages.menu.fields.image'), 'image')
+                            ->disk($this->resolveMediaDisk())
+                            ->dir($this->resolveMediaDir())
+                            ->removable()
+                            ->hint(__('moonshine-pages::moonshine-pages.menu.hints.image')),
+
+                        BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
+                            ->asyncOnInit()
+                            ->asyncSearch()
+                            ->selectMode()
                             ->searchable()
-                            ->nullable()
-                            ->valuesQuery(function (Builder $query, BelongsTo $field) use ($parentTree): Builder {
-                                $original = $field->getData()?->getOriginal();
-
-                                if ($original instanceof Model && $original->getKey() !== null) {
-                                    $query->whereKeyNot($original->getKey());
-                                }
-
-                                return $this->applyTreeOrder($query, $parentTree['order']);
-                            }),
+                            ->fields([]),
                     ]),
                 ]),
             ]),
@@ -160,8 +134,6 @@ class MenuFormPage extends FormPage
 
     protected function rules(DataWrapperContract $item): array
     {
-        $id = $item->getKey();
-
         $slugPattern = (string) config(
             'moonshine-pages.route.slug_pattern',
             '^[A-Za-z0-9-_]+(?:/[A-Za-z0-9-_]+)*$'
@@ -174,17 +146,11 @@ class MenuFormPage extends FormPage
             'prepend_menu_slug' => ['boolean'],
             'image' => ['nullable', 'file'],
             'is_active' => ['boolean'],
-            'sort_order' => ['integer'],
             'source_type' => ['required', 'string', 'in:none,link,page,route'],
             'link' => ['nullable', 'string', 'max:255'],
             'route' => ['nullable', 'string', 'max:255'],
             'source_value' => ['nullable', 'string', 'max:255'],
             'route_params' => ['nullable', 'array'],
-            'parent_id' => array_values(array_filter([
-                'nullable',
-                'integer',
-                $id !== null ? Rule::notIn([(int) $id]) : null,
-            ])),
         ];
 
         foreach ($this->extractRouteParameters($this->resolveSelectedRouteName()) as $parameter) {
@@ -392,63 +358,6 @@ class MenuFormPage extends FormPage
     private function resolveMediaDir(): string
     {
         return (string) config('moonshine-pages.media.image_dir', 'menu');
-    }
-
-    /**
-     * Precompute the menu hierarchy once for the parent select: a breadcrumb
-     * path map (key => "Root / Child / ...", for option labels that keep the
-     * full ancestry visible while searching) and a depth-first ordered list of
-     * keys (so options appear as a tree, parents before children).
-     *
-     * @return array{paths: array<array-key, string>, order: list<array-key>}
-     */
-    private function menuTreeMeta(): array
-    {
-        /** @var class-string<Model> $menuModel */
-        $menuModel = (string) config('moonshine-pages.models.menu', \MB\MoonShine\Models\Menu::class);
-
-        $ordered = MenuResource::orderAsTree(
-            $menuModel::query()->get(['id', 'parent_id', 'name', 'sort_order'])
-        );
-
-        $paths = [];
-        $order = [];
-
-        foreach ($ordered as $menu) {
-            $paths[$menu->getKey()] = (string) $menu->getAttribute('tree_path');
-            $order[] = $menu->getKey();
-        }
-
-        return ['paths' => $paths, 'order' => $order];
-    }
-
-    /**
-     * Order a query by an explicit key sequence (depth-first tree order) using a
-     * portable CASE expression so the parent select lists items as a tree.
-     *
-     * @param  list<array-key>  $order
-     */
-    private function applyTreeOrder(Builder $query, array $order): Builder
-    {
-        if ($order === []) {
-            return $query;
-        }
-
-        $keyName = $query->getModel()->getKeyName();
-
-        $cases = [];
-        $bindings = [];
-
-        foreach ($order as $position => $key) {
-            $cases[] = 'WHEN ? THEN ?';
-            $bindings[] = $key;
-            $bindings[] = $position;
-        }
-
-        return $query->orderByRaw(
-            'CASE '.$keyName.' '.implode(' ', $cases).' ELSE '.count($order).' END',
-            $bindings
-        );
     }
 
     /**

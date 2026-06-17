@@ -6,6 +6,7 @@ namespace MB\MoonShine;
 
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Support\ServiceProvider;
+use MB\MoonShine\MoonShine\Pages\MenuManagerPage;
 use MB\MoonShine\MoonShine\Resources\Menu\MenuResource;
 use MB\MoonShine\MoonShine\Resources\MenuPosition\MenuPositionResource;
 use MB\MoonShine\MoonShine\Resources\Page\PageResource;
@@ -75,13 +76,31 @@ class MoonshinePagesServiceProvider extends ServiceProvider
             $menuResourceClass,
         ]);
 
+        $menuManagerEnabled = (bool) config('moonshine-pages.menu_manager.enabled', true);
+        /** @var class-string $menuManagerPageClass */
+        $menuManagerPageClass = (string) config('moonshine-pages.pages.menu_manager', MenuManagerPage::class);
+
+        if ($menuManagerEnabled) {
+            $core->pages([$menuManagerPageClass]);
+        }
+
         if (config('moonshine-pages.moonshine.register_menu_items', true)) {
+            $items = [
+                MenuItem::make($menuResourceClass, __('moonshine-pages::moonshine-pages.menu.resource_title'), 'list-bullet'),
+                MenuItem::make($menuPositionResourceClass, __('moonshine-pages::moonshine-pages.menu_position.resource_title'), 'view-columns'),
+                MenuItem::make($pageResourceClass, __('moonshine-pages::moonshine-pages.page.resource_title'), 'document-text'),
+            ];
+
+            if ($menuManagerEnabled) {
+                $items[] = MenuItem::make(
+                    $menuManagerPageClass,
+                    __('moonshine-pages::moonshine-pages.menu_manager.title'),
+                    'bars-3'
+                );
+            }
+
             $menu->add([
-                MenuGroup::make(__('moonshine-pages::moonshine-pages.menu_group.content'), [
-                    MenuItem::make($menuResourceClass, __('moonshine-pages::moonshine-pages.menu.resource_title'), 'list-bullet'),
-                    MenuItem::make($menuPositionResourceClass, __('moonshine-pages::moonshine-pages.menu_position.resource_title'), 'view-columns'),
-                    MenuItem::make($pageResourceClass, __('moonshine-pages::moonshine-pages.page.resource_title'), 'document-text'),
-                ], 'rectangle-stack'),
+                MenuGroup::make(__('moonshine-pages::moonshine-pages.menu_group.content'), $items, 'rectangle-stack'),
             ]);
         }
 

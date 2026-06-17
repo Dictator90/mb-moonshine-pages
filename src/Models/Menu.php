@@ -54,7 +54,8 @@ class Menu extends Model
 
     public function positions(): BelongsToMany
     {
-        return $this->belongsToMany($this->menuPositionModelClass(), MoonShinePagesTables::menuMenuPosition());
+        return $this->belongsToMany($this->menuPositionModelClass(), MoonShinePagesTables::menuMenuPosition())
+            ->withPivot('parent_id', 'sort_order');
     }
 
     public function page(): BelongsTo

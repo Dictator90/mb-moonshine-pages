@@ -63,6 +63,40 @@ return [
             'code' => 'For example: main, footer',
         ],
     ],
+    'menu_manager' => [
+        'title' => 'Menu management',
+        'copy_suffix' => '(copy)',
+        'create_item' => '+ Create item',
+        'create_item_footer' => '+ Create menu item',
+        'add_existing' => '+ Add from existing',
+        'empty' => 'This position has no items yet',
+        'nest_hint' => 'Drop here to nest',
+        'status' => [
+            'active' => 'active',
+            'hidden' => 'hidden',
+        ],
+        'actions' => [
+            'edit' => 'edit',
+            'duplicate' => 'dup.',
+            'hide' => 'hide',
+            'show' => 'show',
+            'detach' => 'unlink',
+            'delete' => 'delete',
+        ],
+        'confirm' => [
+            'detach' => 'Remove this item from the position?',
+            'delete' => 'Delete the item completely? Children will be moved one level up.',
+        ],
+        'modal' => [
+            'title' => 'Add from existing',
+            'search' => 'Search by name...',
+            'available' => 'Available items',
+            'already' => 'already in position',
+            'empty' => 'Nothing found',
+            'cancel' => 'Cancel',
+            'add_selected' => 'Add selected',
+        ],
+    ],
     'page' => [
         'resource_title' => 'Pages',
         'actions' => [

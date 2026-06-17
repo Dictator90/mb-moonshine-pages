@@ -33,6 +33,12 @@ class MenuResource extends ModelResource
 
     protected string $column = 'name';
 
+    // Render create/edit forms in a modal — also lets the Menu manager page
+    // reuse this resource's form as an async `crud-form` fragment.
+    protected bool $createInModal = true;
+
+    protected bool $editInModal = true;
+
     protected function onBoot(): void
     {
         parent::onBoot();
