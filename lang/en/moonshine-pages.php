@@ -22,6 +22,8 @@ return [
         'resource_title' => 'Menu',
         'fields' => [
             'name' => 'Name',
+            'slug' => 'Slug prefix',
+            'prepend_menu_slug' => 'Prepend slug to page URL',
             'image' => 'Image',
             'positions' => 'Positions',
             'source_type' => 'Source',
@@ -43,6 +45,7 @@ return [
             'link' => 'Full or relative URL',
             'route_parameter' => 'Enter value for route placeholder',
             'image' => 'Optional icon or thumbnail for the menu item',
+            'slug' => 'Prefix segment, e.g. "news". The page link becomes /{prefix}/{page-slug}; a page with that exact full slug must exist.',
         ],
     ],
     'menu_position' => [
@@ -71,6 +74,9 @@ return [
             'content' => 'Content',
             'seo_title' => 'SEO title',
             'seo_description' => 'SEO description',
+        ],
+        'hints' => [
+            'slug' => 'Multi-segment paths are allowed, e.g. catalog/feature/common.',
         ],
     ],
 ];

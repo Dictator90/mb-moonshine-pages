@@ -22,6 +22,8 @@ return [
         'resource_title' => 'Меню',
         'fields' => [
             'name' => 'Название',
+            'slug' => 'Префикс slug',
+            'prepend_menu_slug' => 'Добавлять префикс к URL страницы',
             'image' => 'Изображение',
             'positions' => 'Позиции',
             'source_type' => 'Источник',
@@ -43,6 +45,7 @@ return [
             'link' => 'Полный или относительный URL',
             'route_parameter' => 'Введите значение для placeholder маршрута',
             'image' => 'Необязательная иконка или миниатюра для пункта меню',
+            'slug' => 'Сегмент-префикс, например "news". Ссылка станет /{префикс}/{slug-страницы}; должна существовать страница с таким полным slug.',
         ],
     ],
     'menu_position' => [
@@ -71,6 +74,9 @@ return [
             'content' => 'Контент',
             'seo_title' => 'SEO title',
             'seo_description' => 'SEO description',
+        ],
+        'hints' => [
+            'slug' => 'Допустимы многосегментные пути, например catalog/feature/common.',
         ],
     ],
 ];

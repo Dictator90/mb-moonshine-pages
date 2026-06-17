@@ -8,6 +8,7 @@ use Illuminate\Foundation\Application;
 use MB\MoonShine\MoonshinePagesServiceProvider;
 use MoonShine\CKEditor\Providers\CKEditorServiceProvider;
 use MoonShine\Laravel\Providers\MoonShineServiceProvider;
+use MoonShine\TinyMce\Providers\TinyMceServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 abstract class TestCase extends OrchestraTestCase
@@ -21,6 +22,7 @@ abstract class TestCase extends OrchestraTestCase
         return [
             MoonShineServiceProvider::class,
             CKEditorServiceProvider::class,
+            TinyMceServiceProvider::class,
             MoonshinePagesServiceProvider::class,
         ];
     }

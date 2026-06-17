@@ -68,7 +68,6 @@ class MenuFormPage extends FormPage
                             ->hint(__('moonshine-pages::moonshine-pages.menu.hints.image')),
 
                         BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
-                            ->asyncOnInit()
                             ->asyncSearch()
                             ->selectMode()
                             ->searchable()
@@ -109,10 +108,20 @@ class MenuFormPage extends FormPage
                             ->hint(__('moonshine-pages::moonshine-pages.menu.hints.link')),
 
                         BelongsTo::make(__('moonshine-pages::moonshine-pages.menu.fields.page'), 'page', null, PageResource::class)
+                            ->searchable()
                             ->nullable()
                             ->showWhen('source_type', 'page'),
 
+                        Switcher::make(__('moonshine-pages::moonshine-pages.menu.fields.prepend_menu_slug'), 'prepend_menu_slug')
+                            ->showWhen('source_type', 'page'),
+
+                        Text::make(__('moonshine-pages::moonshine-pages.menu.fields.slug'), 'slug')
+                            ->showWhen('source_type', 'page')
+                            ->showWhen('prepend_menu_slug', true)
+                            ->hint(__('moonshine-pages::moonshine-pages.menu.hints.slug')),
+
                         Select::make(__('moonshine-pages::moonshine-pages.menu.fields.route'), 'source_value')
+                            ->searchable()
                             ->nullable()
                             ->options($this->getRouteOptions())
                             ->showWhen('source_type', 'route')
@@ -125,6 +134,7 @@ class MenuFormPage extends FormPage
                         ...$this->getRouteParameterFields(),
 
                         BelongsTo::make(__('moonshine-pages::moonshine-pages.menu.fields.parent'), 'parent', null, MenuResource::class)
+                            ->searchable()
                             ->nullable()
                             ->valuesQuery(function (Builder $query, BelongsTo $field): Builder {
                                 $original = $field->getData()?->getOriginal();
@@ -145,8 +155,16 @@ class MenuFormPage extends FormPage
     {
         $id = $item->getKey();
 
+        $slugPattern = (string) config(
+            'moonshine-pages.route.slug_pattern',
+            '^[A-Za-z0-9-_]+(?:/[A-Za-z0-9-_]+)*$'
+        );
+
         $rules = [
             'name' => ['required', 'string', 'max:255'],
+            // `#` delimiter (not `/`): the slug pattern may contain `/` for multi-segment slugs.
+            'slug' => ['nullable', 'string', 'max:255', 'regex:#'.$slugPattern.'#'],
+            'prepend_menu_slug' => ['boolean'],
             'image' => ['nullable', 'file'],
             'is_active' => ['boolean'],
             'sort_order' => ['integer'],

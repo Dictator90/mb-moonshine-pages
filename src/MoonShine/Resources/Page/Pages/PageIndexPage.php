@@ -27,15 +27,17 @@ class PageIndexPage extends IndexPage
      */
     protected function fields(): iterable
     {
-        return [
+        return array_values(array_filter([
             ID::make()->sortable(),
             Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active'),
             Text::make(__('moonshine-pages::moonshine-pages.page.fields.title'), 'title'),
             Text::make(__('moonshine-pages::moonshine-pages.page.fields.slug'), 'slug'),
-            Text::make(__('moonshine-pages::moonshine-pages.page.fields.seo_title'), 'seo_title'),
+            PageResource::seoFieldsEnabled()
+                ? Text::make(__('moonshine-pages::moonshine-pages.page.fields.seo_title'), 'seo_title')
+                : null,
             Date::make(__('moonshine-pages::moonshine-pages.common.created_at'), 'created_at'),
             Date::make(__('moonshine-pages::moonshine-pages.common.updated_at'), 'updated_at'),
-        ];
+        ]));
     }
 
     protected function modifyListComponent(ComponentContract $component): ComponentContract
@@ -79,11 +81,13 @@ class PageIndexPage extends IndexPage
 
     protected function filters(): iterable
     {
-        return [
+        return array_values(array_filter([
             Text::make(__('moonshine-pages::moonshine-pages.page.fields.title'), 'title'),
             Text::make(__('moonshine-pages::moonshine-pages.page.fields.slug'), 'slug'),
-            Text::make(__('moonshine-pages::moonshine-pages.page.fields.seo_title'), 'seo_title'),
+            PageResource::seoFieldsEnabled()
+                ? Text::make(__('moonshine-pages::moonshine-pages.page.fields.seo_title'), 'seo_title')
+                : null,
             Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active'),
-        ];
+        ]));
     }
 }
