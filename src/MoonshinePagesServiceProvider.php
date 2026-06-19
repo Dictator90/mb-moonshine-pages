@@ -85,11 +85,7 @@ class MoonshinePagesServiceProvider extends ServiceProvider
         }
 
         if (config('moonshine-pages.moonshine.register_menu_items', true)) {
-            $items = [
-                MenuItem::make($menuResourceClass, __('moonshine-pages::moonshine-pages.menu.resource_title'), 'list-bullet'),
-                MenuItem::make($menuPositionResourceClass, __('moonshine-pages::moonshine-pages.menu_position.resource_title'), 'view-columns'),
-                MenuItem::make($pageResourceClass, __('moonshine-pages::moonshine-pages.page.resource_title'), 'document-text'),
-            ];
+            $items = [];
 
             if ($menuManagerEnabled) {
                 $items[] = MenuItem::make(
@@ -98,6 +94,14 @@ class MoonshinePagesServiceProvider extends ServiceProvider
                     'bars-3'
                 );
             }
+
+
+            $items = [
+                ...$items,
+                MenuItem::make($menuResourceClass, __('moonshine-pages::moonshine-pages.menu.resource_title'), 'list-bullet'),
+                MenuItem::make($menuPositionResourceClass, __('moonshine-pages::moonshine-pages.menu_position.resource_title'), 'view-columns'),
+                MenuItem::make($pageResourceClass, __('moonshine-pages::moonshine-pages.page.resource_title'), 'document-text'),
+            ];
 
             $menu->add([
                 MenuGroup::make(__('moonshine-pages::moonshine-pages.menu_group.content'), $items, 'rectangle-stack'),
