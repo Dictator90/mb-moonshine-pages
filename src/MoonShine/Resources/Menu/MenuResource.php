@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace MB\MoonShine\MoonShine\Resources\Menu;
 
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 use MB\MoonShine\Models\Menu as MenuModel;
 use MB\MoonShine\MoonShine\Resources\Menu\Pages\MenuFormPage;
 use MB\MoonShine\MoonShine\Resources\Menu\Pages\MenuIndexPage;
@@ -28,6 +33,12 @@ class MenuResource extends ModelResource
 
     protected string $column = 'name';
 
+    // Render create/edit forms in a modal — also lets the Menu manager page
+    // reuse this resource's form as an async `crud-form` fragment.
+    protected bool $createInModal = true;
+
+    protected bool $editInModal = true;
+
     protected function onBoot(): void
     {
         parent::onBoot();
@@ -38,6 +49,128 @@ class MenuResource extends ModelResource
     public function getTitle(): string
     {
         return __('moonshine-pages::moonshine-pages.menu.resource_title');
+    }
+
+    /**
+     * Whether the Menu index renders as a parent_id hierarchy (tree) instead of
+     * a flat list. Shared with {@see MenuIndexPage} so the name column knows to
+     * show indentation.
+     */
+    public static function indexTreeEnabled(): bool
+    {
+        return (bool) config('moonshine-pages.menu.index_tree', false);
+    }
+
+    /**
+     * Tree-ordered options for parent selects/filters: `[key => breadcrumb path]`
+     * (e.g. "Tours / Cruises / Sea"), depth-first so children follow their
+     * parents and the full ancestry stays visible while searching. Built from
+     * {@see orderAsTree}.
+     *
+     * @return array<array-key, string>
+     */
+    public static function treeOptions(): array
+    {
+        /** @var class-string<Model> $menuModel */
+        $menuModel = (string) config('moonshine-pages.models.menu', MenuModel::class);
+
+        $options = [];
+
+        foreach (self::orderAsTree($menuModel::query()->get(['id', 'parent_id', 'name', 'sort_order'])) as $menu) {
+            $options[$menu->getKey()] = (string) $menu->getAttribute('tree_path');
+        }
+
+        return $options;
+    }
+
+    /**
+     * Tree mode shows the whole hierarchy at once, so pagination is disabled
+     * (children must stay next to their parents across "pages").
+     */
+    public function isPaginationUsed(): bool
+    {
+        return self::indexTreeEnabled() ? false : parent::isPaginationUsed();
+    }
+
+    public function getItems(): iterable|Collection|LazyCollection|CursorPaginator|Paginator
+    {
+        if (! self::indexTreeEnabled()) {
+            return parent::getItems();
+        }
+
+        return self::orderAsTree($this->getQuery()->get());
+    }
+
+    /**
+     * Flatten a flat menu collection into depth-first tree order, tagging each
+     * model with `tree_depth` and an indented `tree_name`. Items whose parent is
+     * absent from the set (e.g. filtered out) are treated as roots; any items
+     * left unreachable (cycles) are appended so nothing is silently dropped.
+     *
+     * @param  Collection<int, Model>  $items
+     * @return Collection<int, Model>
+     */
+    public static function orderAsTree(Collection $items): Collection
+    {
+        if ($items->isEmpty()) {
+            return $items;
+        }
+
+        $keyName = $items->first()->getKeyName();
+        $presentKeys = array_flip($items->map(static fn (Model $m): mixed => $m->getAttribute($keyName))->all());
+
+        /** @var array<array-key, list<Model>> $childrenByParent */
+        $childrenByParent = [];
+
+        foreach ($items as $item) {
+            $parentId = $item->getAttribute('parent_id');
+            $bucket = ($parentId !== null && isset($presentKeys[$parentId])) ? $parentId : '__root__';
+            $childrenByParent[$bucket][] = $item;
+        }
+
+        foreach ($childrenByParent as $bucket => $children) {
+            usort($children, static function (Model $a, Model $b) use ($keyName): int {
+                return ((int) ($a->getAttribute('sort_order') ?? 0) <=> (int) ($b->getAttribute('sort_order') ?? 0))
+                    ?: ($a->getAttribute($keyName) <=> $b->getAttribute($keyName));
+            });
+
+            $childrenByParent[$bucket] = $children;
+        }
+
+        /** @var Collection<int, Model> $ordered */
+        $ordered = new Collection();
+
+        $walk = static function (mixed $bucketKey, int $depth, string $parentPath) use (&$walk, $childrenByParent, $ordered, $keyName): void {
+            foreach ($childrenByParent[$bucketKey] ?? [] as $node) {
+                $name = (string) $node->getAttribute('name');
+                $path = $parentPath === '' ? $name : $parentPath.' / '.$name;
+
+                $node->setAttribute('tree_depth', $depth);
+                $node->setAttribute('tree_name', str_repeat('— ', $depth).$name);
+                $node->setAttribute('tree_path', $path);
+
+                $ordered->push($node);
+
+                $walk($node->getAttribute($keyName), $depth + 1, $path);
+            }
+        };
+
+        $walk('__root__', 0, '');
+
+        if ($ordered->count() < $items->count()) {
+            $seen = array_flip($ordered->map(static fn (Model $m): mixed => $m->getAttribute($keyName))->all());
+
+            foreach ($items as $item) {
+                if (! isset($seen[$item->getAttribute($keyName)])) {
+                    $item->setAttribute('tree_depth', 0);
+                    $item->setAttribute('tree_name', (string) $item->getAttribute('name'));
+                    $item->setAttribute('tree_path', (string) $item->getAttribute('name'));
+                    $ordered->push($item);
+                }
+            }
+        }
+
+        return $ordered;
     }
 
     protected function pages(): array

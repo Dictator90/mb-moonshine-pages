@@ -32,6 +32,16 @@ class PageResource extends ModelResource
         return __('moonshine-pages::moonshine-pages.page.resource_title');
     }
 
+    /**
+     * Whether the built-in SEO fields (seo_title / seo_description) are enabled.
+     * Disable via config when the host manages SEO separately or the pages table
+     * has no SEO columns. Shared by the resource and its index/form pages.
+     */
+    public static function seoFieldsEnabled(): bool
+    {
+        return (bool) config('moonshine-pages.fields.page_seo', true);
+    }
+
     protected function pages(): array
     {
         return [
@@ -43,7 +53,7 @@ class PageResource extends ModelResource
 
     protected function detailFields(): iterable
     {
-        return [
+        $fields = [
             ID::make(),
 
             Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active'),
@@ -53,25 +63,28 @@ class PageResource extends ModelResource
             Text::make(__('moonshine-pages::moonshine-pages.page.fields.slug'), 'slug'),
 
             Preview::make(__('moonshine-pages::moonshine-pages.page.fields.content'), 'content'),
-
-            Text::make(__('moonshine-pages::moonshine-pages.page.fields.seo_title'), 'seo_title'),
-
-            Textarea::make(__('moonshine-pages::moonshine-pages.page.fields.seo_description'), 'seo_description')
-                ->customAttributes(['rows' => 3]),
-
-            Date::make(__('moonshine-pages::moonshine-pages.common.created_at'), 'created_at')
-                ->format('d.m.Y H:i')
-                ->withTime(),
-
-            Date::make(__('moonshine-pages::moonshine-pages.common.updated_at'), 'updated_at')
-                ->format('d.m.Y H:i')
-                ->withTime(),
         ];
+
+        if (self::seoFieldsEnabled()) {
+            $fields[] = Text::make(__('moonshine-pages::moonshine-pages.page.fields.seo_title'), 'seo_title');
+            $fields[] = Textarea::make(__('moonshine-pages::moonshine-pages.page.fields.seo_description'), 'seo_description')
+                ->customAttributes(['rows' => 3]);
+        }
+
+        $fields[] = Date::make(__('moonshine-pages::moonshine-pages.common.created_at'), 'created_at')
+            ->format('d.m.Y H:i')
+            ->withTime();
+
+        $fields[] = Date::make(__('moonshine-pages::moonshine-pages.common.updated_at'), 'updated_at')
+            ->format('d.m.Y H:i')
+            ->withTime();
+
+        return $fields;
     }
 
     protected function fields(): array
     {
-        return [
+        $fields = [
             ID::make()->sortable(),
 
             Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active')
@@ -82,17 +95,22 @@ class PageResource extends ModelResource
 
             Text::make(__('moonshine-pages::moonshine-pages.page.fields.slug'), 'slug')
                 ->required(),
-
-            Textarea::make(__('moonshine-pages::moonshine-pages.page.fields.seo_title'), 'seo_title')
-                ->customAttributes(['rows' => 2]),
-
-            Textarea::make(__('moonshine-pages::moonshine-pages.page.fields.seo_description'), 'seo_description')
-                ->customAttributes(['rows' => 3]),
         ];
+
+        if (self::seoFieldsEnabled()) {
+            $fields[] = Textarea::make(__('moonshine-pages::moonshine-pages.page.fields.seo_title'), 'seo_title')
+                ->customAttributes(['rows' => 2]);
+            $fields[] = Textarea::make(__('moonshine-pages::moonshine-pages.page.fields.seo_description'), 'seo_description')
+                ->customAttributes(['rows' => 3]);
+        }
+
+        return $fields;
     }
 
     protected function search(): array
     {
-        return ['id', 'title', 'slug', 'seo_title'];
+        return self::seoFieldsEnabled()
+            ? ['id', 'title', 'slug', 'seo_title']
+            : ['id', 'title', 'slug'];
     }
 }

@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace MB\MoonShine\MoonShine\Resources\Menu\Pages;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Route as IlluminateRoute;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Validation\Rule;
 use MB\MoonShine\MoonShine\Resources\Menu\MenuResource;
 use MB\MoonShine\MoonShine\Resources\MenuPosition\MenuPositionResource;
 use MB\MoonShine\MoonShine\Resources\Page\PageResource;
@@ -25,7 +22,6 @@ use MoonShine\UI\Components\Tabs\Tab;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Image;
-use MoonShine\UI\Fields\Number;
 use MoonShine\UI\Fields\Select;
 use MoonShine\UI\Fields\Switcher;
 use MoonShine\UI\Fields\Text;
@@ -55,27 +51,11 @@ class MenuFormPage extends FormPage
                             ]),
                         ], justifyAlign: 'left'),
 
-                        Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active')
-                            ->default(true),
-
                         Text::make(__('moonshine-pages::moonshine-pages.menu.fields.name'), 'name')
                             ->required(),
 
-                        Image::make(__('moonshine-pages::moonshine-pages.menu.fields.image'), 'image')
-                            ->disk($this->resolveMediaDisk())
-                            ->dir($this->resolveMediaDir())
-                            ->removable()
-                            ->hint(__('moonshine-pages::moonshine-pages.menu.hints.image')),
-
-                        BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
-                            ->asyncOnInit()
-                            ->asyncSearch()
-                            ->selectMode()
-                            ->searchable()
-                            ->fields([]),
-
-                        Number::make(__('moonshine-pages::moonshine-pages.common.sort_order'), 'sort_order')
-                            ->default(0),
+                        Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active')
+                            ->default(true),
 
                         Select::make(__('moonshine-pages::moonshine-pages.menu.fields.source_type'), 'source_type')
                             ->options([
@@ -109,10 +89,20 @@ class MenuFormPage extends FormPage
                             ->hint(__('moonshine-pages::moonshine-pages.menu.hints.link')),
 
                         BelongsTo::make(__('moonshine-pages::moonshine-pages.menu.fields.page'), 'page', null, PageResource::class)
+                            ->searchable()
                             ->nullable()
                             ->showWhen('source_type', 'page'),
 
+                        Switcher::make(__('moonshine-pages::moonshine-pages.menu.fields.prepend_menu_slug'), 'prepend_menu_slug')
+                            ->showWhen('source_type', 'page'),
+
+                        Text::make(__('moonshine-pages::moonshine-pages.menu.fields.slug'), 'slug')
+                            ->showWhen('source_type', 'page')
+                            ->showWhen('prepend_menu_slug', true)
+                            ->hint(__('moonshine-pages::moonshine-pages.menu.hints.slug')),
+
                         Select::make(__('moonshine-pages::moonshine-pages.menu.fields.route'), 'source_value')
+                            ->searchable()
                             ->nullable()
                             ->options($this->getRouteOptions())
                             ->showWhen('source_type', 'route')
@@ -124,17 +114,18 @@ class MenuFormPage extends FormPage
 
                         ...$this->getRouteParameterFields(),
 
-                        BelongsTo::make(__('moonshine-pages::moonshine-pages.menu.fields.parent'), 'parent', null, MenuResource::class)
-                            ->nullable()
-                            ->valuesQuery(function (Builder $query, BelongsTo $field): Builder {
-                                $original = $field->getData()?->getOriginal();
+                        Image::make(__('moonshine-pages::moonshine-pages.menu.fields.image'), 'image')
+                            ->disk($this->resolveMediaDisk())
+                            ->dir($this->resolveMediaDir())
+                            ->removable()
+                            ->hint(__('moonshine-pages::moonshine-pages.menu.hints.image')),
 
-                                if ($original instanceof Model && $original->getKey() !== null) {
-                                    $query->whereKeyNot($original->getKey());
-                                }
-
-                                return $query;
-                            }),
+                        BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
+                            ->asyncOnInit()
+                            ->asyncSearch()
+                            ->selectMode()
+                            ->searchable()
+                            ->fields([]),
                     ]),
                 ]),
             ]),
@@ -143,23 +134,23 @@ class MenuFormPage extends FormPage
 
     protected function rules(DataWrapperContract $item): array
     {
-        $id = $item->getKey();
+        $slugPattern = (string) config(
+            'moonshine-pages.route.slug_pattern',
+            '^[A-Za-z0-9-_]+(?:/[A-Za-z0-9-_]+)*$'
+        );
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
+            // `#` delimiter (not `/`): the slug pattern may contain `/` for multi-segment slugs.
+            'slug' => ['nullable', 'string', 'max:255', 'regex:#'.$slugPattern.'#'],
+            'prepend_menu_slug' => ['boolean'],
             'image' => ['nullable', 'file'],
             'is_active' => ['boolean'],
-            'sort_order' => ['integer'],
             'source_type' => ['required', 'string', 'in:none,link,page,route'],
             'link' => ['nullable', 'string', 'max:255'],
             'route' => ['nullable', 'string', 'max:255'],
             'source_value' => ['nullable', 'string', 'max:255'],
             'route_params' => ['nullable', 'array'],
-            'parent_id' => array_values(array_filter([
-                'nullable',
-                'integer',
-                $id !== null ? Rule::notIn([(int) $id]) : null,
-            ])),
         ];
 
         foreach ($this->extractRouteParameters($this->resolveSelectedRouteName()) as $parameter) {

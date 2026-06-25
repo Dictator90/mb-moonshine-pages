@@ -22,6 +22,8 @@ return [
         'resource_title' => 'Menu',
         'fields' => [
             'name' => 'Name',
+            'slug' => 'Slug prefix',
+            'prepend_menu_slug' => 'Prepend slug to page URL',
             'image' => 'Image',
             'positions' => 'Positions',
             'source_type' => 'Source',
@@ -43,6 +45,7 @@ return [
             'link' => 'Full or relative URL',
             'route_parameter' => 'Enter value for route placeholder',
             'image' => 'Optional icon or thumbnail for the menu item',
+            'slug' => 'Prefix segment, e.g. "news". The page link becomes /{prefix}/{page-slug}; a page with that exact full slug must exist.',
         ],
     ],
     'menu_position' => [
@@ -60,6 +63,40 @@ return [
             'code' => 'For example: main, footer',
         ],
     ],
+    'menu_manager' => [
+        'title' => 'Menu management',
+        'copy_suffix' => '(copy)',
+        'create_item' => '+ Create item',
+        'create_item_footer' => '+ Create menu item',
+        'add_existing' => '+ Add from existing',
+        'empty' => 'This position has no items yet',
+        'nest_hint' => 'Drop here to nest',
+        'status' => [
+            'active' => 'active',
+            'hidden' => 'hidden',
+        ],
+        'actions' => [
+            'edit' => 'edit',
+            'duplicate' => 'dup.',
+            'hide' => 'hide',
+            'show' => 'show',
+            'detach' => 'unlink',
+            'delete' => 'delete',
+        ],
+        'confirm' => [
+            'detach' => 'Remove this item from the position?',
+            'delete' => 'Delete the item completely? Children will be moved one level up.',
+        ],
+        'modal' => [
+            'title' => 'Add from existing',
+            'search' => 'Search by name...',
+            'available' => 'Available items',
+            'already' => 'already in position',
+            'empty' => 'Nothing found',
+            'cancel' => 'Cancel',
+            'add_selected' => 'Add selected',
+        ],
+    ],
     'page' => [
         'resource_title' => 'Pages',
         'actions' => [
@@ -71,6 +108,9 @@ return [
             'content' => 'Content',
             'seo_title' => 'SEO title',
             'seo_description' => 'SEO description',
+        ],
+        'hints' => [
+            'slug' => 'Multi-segment paths are allowed, e.g. catalog/feature/common.',
         ],
     ],
 ];

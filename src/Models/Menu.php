@@ -23,6 +23,8 @@ class Menu extends Model
 
     protected $fillable = [
         'name',
+        'slug',
+        'prepend_menu_slug',
         'image',
         'menu_position_id',
         'is_active',
@@ -39,6 +41,7 @@ class Menu extends Model
     {
         return [
             'is_active' => 'bool',
+            'prepend_menu_slug' => 'bool',
             'sort_order' => 'int',
             'route_params' => 'array',
         ];
@@ -51,7 +54,8 @@ class Menu extends Model
 
     public function positions(): BelongsToMany
     {
-        return $this->belongsToMany($this->menuPositionModelClass(), MoonShinePagesTables::menuMenuPosition());
+        return $this->belongsToMany($this->menuPositionModelClass(), MoonShinePagesTables::menuMenuPosition())
+            ->withPivot('parent_id', 'sort_order');
     }
 
     public function page(): BelongsTo
@@ -96,13 +100,31 @@ class Menu extends Model
         return match ($this->source_type) {
             'none' => '#',
             'page' => $this->page && $this->page->is_active
-                ? route($pageRouteName, $this->page->slug)
+                ? route($pageRouteName, $this->pageRouteSlug())
                 : '#',
             'route' => $this->source_value && Route::has($this->source_value)
                 ? $this->resolveRouteUrl((string) $this->source_value, $routeParams)
                 : '#',
             default => $this->source_value ?: '#',
         };
+    }
+
+    /**
+     * Slug passed to the page route. When prepend_menu_slug is enabled and the
+     * menu item has its own slug, the page URL becomes /{menu_slug}/{page_slug}.
+     * The composed path must match a stored page slug (strict resolution).
+     */
+    private function pageRouteSlug(): string
+    {
+        $pageSlug = (string) $this->page->slug;
+
+        $menuSlug = is_string($this->slug) ? trim($this->slug, '/') : '';
+
+        if ($this->prepend_menu_slug && $menuSlug !== '') {
+            return $menuSlug.'/'.$pageSlug;
+        }
+
+        return $pageSlug;
     }
 
     /**

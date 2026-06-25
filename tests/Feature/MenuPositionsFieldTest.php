@@ -17,7 +17,8 @@ final class MenuPositionsFieldTest extends TestCase
         $this->assertStringContainsString('resource: MenuPositionResource::class', $contents);
         $this->assertStringContainsString('->asyncSearch()', $contents);
         $this->assertStringContainsString('->fields([])', $contents);
-        $this->assertStringNotContainsString('->asyncOnInit()', $contents);
+        // The positions field preloads its options on init (async-on-init).
+        $this->assertStringContainsString('->asyncOnInit()', $contents);
     }
 
     public function test_menu_position_tab_uses_select_mode_for_menus(): void

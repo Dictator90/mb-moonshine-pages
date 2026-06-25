@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use MB\MoonShine\Models\Menu;
 use MB\MoonShine\Models\MenuPosition;
+use MB\MoonShine\Support\MoonShinePagesTables;
 
 class MenuRepository
 {
@@ -68,22 +69,26 @@ class MenuRepository
         /** @var class-string<Model> $menuModel */
         $menuModel = (string) config('moonshine-pages.models.menu', Menu::class);
 
+        $menusTable = MoonShinePagesTables::menus();
+        $pivotTable = MoonShinePagesTables::menuMenuPosition();
+
         /** @var \Illuminate\Database\Eloquent\Collection<int, Menu|Model> $items */
         $items = $menuModel::query()
             ->active()
-            ->whereHas('positions', function ($query) use ($position): void {
-                $query->where($position->getTable().'.id', $position->id);
-            })
+            ->join($pivotTable, "{$pivotTable}.menu_id", '=', "{$menusTable}.id")
+            ->where("{$pivotTable}.menu_position_id", $position->getKey())
             ->with(['page', 'positions'])
-            ->orderBy('parent_id')
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->get();
+            ->orderBy("{$pivotTable}.sort_order")
+            ->orderBy("{$menusTable}.name")
+            ->get([
+                "{$menusTable}.*",
+                "{$pivotTable}.parent_id as pivot_parent_id",
+            ]);
 
         $byParent = [];
 
         foreach ($items as $item) {
-            $byParent[$item->parent_id ?? 0][] = $item;
+            $byParent[$item->getAttribute('pivot_parent_id') ?? 0][] = $item;
         }
 
         return $this->buildBranch($byParent, 0);

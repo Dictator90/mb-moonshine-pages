@@ -42,12 +42,14 @@ final class SlugRouteConstraint
 
         $alternation = implode('|', $escaped);
 
-        return '^(?!(?:'.$alternation.')$)'.$matches[1].'$';
+        // Block the reserved value as the whole first segment so that both
+        // "admin" and nested paths like "admin/anything" never match the page route.
+        return '^(?!(?:'.$alternation.')(?:/|$))'.$matches[1].'$';
     }
 
     public static function pattern(): string
     {
-        $base = (string) config('moonshine-pages.route.slug_pattern', '^[A-Za-z0-9-_]+$');
+        $base = (string) config('moonshine-pages.route.slug_pattern', '^[A-Za-z0-9-_]+(?:/[A-Za-z0-9-_]+)*$');
         $apply = (bool) config('moonshine-pages.route.apply_reserved_slugs', true);
 
         /** @var mixed $reservedConfig */

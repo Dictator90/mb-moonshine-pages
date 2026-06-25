@@ -31,10 +31,14 @@ class MenuIndexPage extends IndexPage
      */
     protected function fields(): iterable
     {
+        $treeMode = MenuResource::indexTreeEnabled();
+
         return [
             ID::make()->sortable(),
             Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active'),
-            Text::make(__('moonshine-pages::moonshine-pages.menu.fields.name'), 'name'),
+            $treeMode
+                ? Text::make(__('moonshine-pages::moonshine-pages.menu.fields.name'), 'tree_name')
+                : Text::make(__('moonshine-pages::moonshine-pages.menu.fields.name'), 'name'),
             BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
                 ->inLine(
                     separator: ' ',
@@ -74,11 +78,17 @@ class MenuIndexPage extends IndexPage
                 ->selectMode()
                 ->searchable(),
             Select::make(__('moonshine-pages::moonshine-pages.menu.fields.source_type'), 'source_type')
+                ->nullable()
                 ->options([
+                    'none' => __('moonshine-pages::moonshine-pages.menu.source_types.none'),
                     'link' => __('moonshine-pages::moonshine-pages.menu.source_types.link'),
                     'page' => __('moonshine-pages::moonshine-pages.menu.source_types.page'),
                     'route' => __('moonshine-pages::moonshine-pages.menu.source_types.route'),
                 ]),
+            Select::make(__('moonshine-pages::moonshine-pages.menu.fields.parent'), 'parent_id')
+                ->nullable()
+                ->searchable()
+                ->options(MenuResource::treeOptions()),
             Switcher::make(__('moonshine-pages::moonshine-pages.common.is_active'), 'is_active'),
             Number::make(__('moonshine-pages::moonshine-pages.common.sort_order'), 'sort_order'),
         ];
