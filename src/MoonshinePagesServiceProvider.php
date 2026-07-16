@@ -7,10 +7,8 @@ namespace MB\MoonShine;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Support\ServiceProvider;
 use MB\MoonShine\MoonShine\Pages\MenuManagerPage;
-use MB\MoonShine\MoonShine\Resources\Menu\MenuResource;
-use MB\MoonShine\MoonShine\Resources\MenuPosition\MenuPositionResource;
-use MB\MoonShine\MoonShine\Resources\Page\PageResource;
 use MB\MoonShine\Services\Menu\MenuRepository;
+use MB\MoonShine\Support\MoonShinePagesResources;
 use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
 use MoonShine\Contracts\MenuManager\MenuManagerContract;
 use MoonShine\Laravel\DependencyInjection\MoonShineConfigurator;
@@ -63,17 +61,10 @@ class MoonshinePagesServiceProvider extends ServiceProvider
             ], 'moonshine-pages-translations');
         }
 
-        /** @var class-string $menuResourceClass */
-        $menuResourceClass = (string) config('moonshine-pages.resources.menu', MenuResource::class);
-        /** @var class-string $menuPositionResourceClass */
-        $menuPositionResourceClass = (string) config('moonshine-pages.resources.menu_position', MenuPositionResource::class);
-        /** @var class-string $pageResourceClass */
-        $pageResourceClass = (string) config('moonshine-pages.resources.page', PageResource::class);
-
         $core->resources([
-            $pageResourceClass,
-            $menuPositionResourceClass,
-            $menuResourceClass,
+            MoonShinePagesResources::page(),
+            MoonShinePagesResources::menuPosition(),
+            MoonShinePagesResources::menu(),
         ]);
 
         $menuManagerEnabled = (bool) config('moonshine-pages.menu_manager.enabled', true);

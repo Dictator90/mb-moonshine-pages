@@ -9,9 +9,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use MB\MoonShine\Models\Menu;
-use MB\MoonShine\MoonShine\Resources\Menu\MenuResource;
 use MB\MoonShine\Services\Menu\MenuManagerService;
 use MB\MoonShine\Services\Menu\MenuRepository;
+use MB\MoonShine\Support\MoonShinePagesResources;
 use MB\MoonShine\Support\MoonShinePagesTables;
 use MoonShine\Contracts\Core\CrudResourceContract;
 use MoonShine\Laravel\Pages\Page;
@@ -459,7 +459,7 @@ final class MenuManagerPage extends Page
     private function resource(): CrudResourceContract
     {
         /** @var class-string<CrudResourceContract> $class */
-        $class = (string) config('moonshine-pages.resources.menu', MenuResource::class);
+        $class = MoonShinePagesResources::menu();
 
         /** @var CrudResourceContract $resource */
         $resource = $this->getCore()->getContainer($class);

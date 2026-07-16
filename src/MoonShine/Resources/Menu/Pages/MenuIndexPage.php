@@ -6,7 +6,7 @@ namespace MB\MoonShine\MoonShine\Resources\Menu\Pages;
 
 use Illuminate\Database\Eloquent\Model;
 use MB\MoonShine\MoonShine\Resources\Menu\MenuResource;
-use MB\MoonShine\MoonShine\Resources\MenuPosition\MenuPositionResource;
+use MB\MoonShine\Support\MoonShinePagesResources;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Laravel\Fields\Relationships\BelongsToMany;
@@ -39,13 +39,13 @@ class MenuIndexPage extends IndexPage
             $treeMode
                 ? Text::make(__('moonshine-pages::moonshine-pages.menu.fields.name'), 'tree_name')
                 : Text::make(__('moonshine-pages::moonshine-pages.menu.fields.name'), 'name'),
-            BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
+            BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MoonShinePagesResources::menuPosition())
                 ->inLine(
                     separator: ' ',
                     badge: fn ($model, $value) => Badge::make((string) $value, 'primary'),
                     link: function (Model $property, $value, $field): string|Link {
                         return Link::make(
-                            app(MenuPositionResource::class)->getFormPageUrl($property->id),
+                            app(MoonShinePagesResources::menuPosition())->getFormPageUrl($property->id),
                             $value
                         );
                     }
@@ -74,7 +74,7 @@ class MenuIndexPage extends IndexPage
         return [
             Text::make(__('moonshine-pages::moonshine-pages.menu.fields.name'), 'name'),
             Text::make(__('moonshine-pages::moonshine-pages.menu.fields.source_value'), 'source_value'),
-            BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
+            BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MoonShinePagesResources::menuPosition())
                 ->selectMode()
                 ->searchable(),
             Select::make(__('moonshine-pages::moonshine-pages.menu.fields.source_type'), 'source_type')

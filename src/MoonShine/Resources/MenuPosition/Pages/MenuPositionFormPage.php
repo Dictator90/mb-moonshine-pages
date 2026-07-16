@@ -6,8 +6,8 @@ namespace MB\MoonShine\MoonShine\Resources\MenuPosition\Pages;
 
 use Illuminate\Database\Eloquent\Model;
 use MB\MoonShine\Models\Menu;
-use MB\MoonShine\MoonShine\Resources\Menu\MenuResource;
 use MB\MoonShine\MoonShine\Resources\MenuPosition\MenuPositionResource;
+use MB\MoonShine\Support\MoonShinePagesResources;
 use MB\MoonShine\Support\MoonShinePagesTables;
 use Illuminate\Validation\Rule;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
@@ -75,7 +75,7 @@ class MenuPositionFormPage extends FormPage
 
                                 return sprintf('%s — %s — %s', $menu->name, $typeLabel, $activeLabel,);
                             },
-                            MenuResource::class,
+                            MoonShinePagesResources::menu(),
                         )
                             ->asyncSearch()
                             ->selectMode()

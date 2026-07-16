@@ -7,8 +7,7 @@ namespace MB\MoonShine\MoonShine\Resources\Menu\Pages;
 use Illuminate\Routing\Route as IlluminateRoute;
 use Illuminate\Support\Facades\Route;
 use MB\MoonShine\MoonShine\Resources\Menu\MenuResource;
-use MB\MoonShine\MoonShine\Resources\MenuPosition\MenuPositionResource;
-use MB\MoonShine\MoonShine\Resources\Page\PageResource;
+use MB\MoonShine\Support\MoonShinePagesResources;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
@@ -88,7 +87,7 @@ class MenuFormPage extends FormPage
                             ->showWhen('source_type', 'link')
                             ->hint(__('moonshine-pages::moonshine-pages.menu.hints.link')),
 
-                        BelongsTo::make(__('moonshine-pages::moonshine-pages.menu.fields.page'), 'page', null, PageResource::class)
+                        BelongsTo::make(__('moonshine-pages::moonshine-pages.menu.fields.page'), 'page', null, MoonShinePagesResources::page())
                             ->searchable()
                             ->nullable()
                             ->showWhen('source_type', 'page'),
@@ -120,7 +119,7 @@ class MenuFormPage extends FormPage
                             ->removable()
                             ->hint(__('moonshine-pages::moonshine-pages.menu.hints.image')),
 
-                        BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
+                        BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MoonShinePagesResources::menuPosition())
                             ->asyncOnInit()
                             ->asyncSearch()
                             ->selectMode()

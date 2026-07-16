@@ -12,8 +12,7 @@ use Illuminate\Support\LazyCollection;
 use MB\MoonShine\Models\Menu as MenuModel;
 use MB\MoonShine\MoonShine\Resources\Menu\Pages\MenuFormPage;
 use MB\MoonShine\MoonShine\Resources\Menu\Pages\MenuIndexPage;
-use MB\MoonShine\MoonShine\Resources\MenuPosition\MenuPositionResource;
-use MB\MoonShine\MoonShine\Resources\Page\PageResource;
+use MB\MoonShine\Support\MoonShinePagesResources;
 use MoonShine\Laravel\Fields\Relationships\BelongsTo;
 use MoonShine\Laravel\Fields\Relationships\BelongsToMany;
 use MoonShine\Laravel\Pages\Crud\DetailPage;
@@ -195,7 +194,7 @@ class MenuResource extends ModelResource
                 ->disk($this->mediaDisk())
                 ->dir($this->mediaDir()),
 
-            BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
+            BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MoonShinePagesResources::menuPosition())
                 ->selectMode(),
 
             Number::make(__('moonshine-pages::moonshine-pages.common.sort_order'), 'sort_order'),
@@ -213,9 +212,9 @@ class MenuResource extends ModelResource
 
             Text::make(__('moonshine-pages::moonshine-pages.menu.fields.source_value'), 'source_value'),
 
-            BelongsTo::make(__('moonshine-pages::moonshine-pages.menu.fields.page'), 'page', null, PageResource::class),
+            BelongsTo::make(__('moonshine-pages::moonshine-pages.menu.fields.page'), 'page', null, MoonShinePagesResources::page()),
 
-            BelongsTo::make(__('moonshine-pages::moonshine-pages.menu.fields.parent'), 'parent', null, self::class),
+            BelongsTo::make(__('moonshine-pages::moonshine-pages.menu.fields.parent'), 'parent', null, MoonShinePagesResources::menu()),
 
             Preview::make(__('moonshine-pages::moonshine-pages.menu.fields.route_params'), 'route_params')
                 ->changePreview(function (mixed $value): string {
@@ -261,7 +260,7 @@ class MenuResource extends ModelResource
                 ->disk($this->mediaDisk())
                 ->dir($this->mediaDir()),
 
-            BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MenuPositionResource::class)
+            BelongsToMany::make(__('moonshine-pages::moonshine-pages.menu.fields.positions'), 'positions', resource: MoonShinePagesResources::menuPosition())
                 ->selectMode()
                 ->searchable(),
 
