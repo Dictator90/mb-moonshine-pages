@@ -14,7 +14,7 @@ final class MenuPositionsFieldTest extends TestCase
 
         $this->assertIsString($contents);
         $this->assertStringContainsString('menu.fields.positions', $contents);
-        $this->assertStringContainsString('resource: MenuPositionResource::class', $contents);
+        $this->assertStringContainsString('resource: MoonShinePagesResources::menuPosition()', $contents);
         $this->assertStringContainsString('->asyncSearch()', $contents);
         $this->assertStringContainsString('->fields([])', $contents);
         // The positions field preloads its options on init (async-on-init).

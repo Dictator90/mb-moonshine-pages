@@ -89,9 +89,9 @@ class MoonshinePagesServiceProvider extends ServiceProvider
 
             $items = [
                 ...$items,
-                MenuItem::make($menuResourceClass, __('moonshine-pages::moonshine-pages.menu.resource_title'), 'list-bullet'),
-                MenuItem::make($menuPositionResourceClass, __('moonshine-pages::moonshine-pages.menu_position.resource_title'), 'view-columns'),
-                MenuItem::make($pageResourceClass, __('moonshine-pages::moonshine-pages.page.resource_title'), 'document-text'),
+                MenuItem::make(MoonShinePagesResources::menu(), __('moonshine-pages::moonshine-pages.menu.resource_title'), 'list-bullet'),
+                MenuItem::make(MoonShinePagesResources::menuPosition(), __('moonshine-pages::moonshine-pages.menu_position.resource_title'), 'view-columns'),
+                MenuItem::make(MoonShinePagesResources::page(), __('moonshine-pages::moonshine-pages.page.resource_title'), 'document-text'),
             ];
 
             $menu->add([

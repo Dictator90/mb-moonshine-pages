@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-07-22
+
+### Fixed
+- `MoonshinePagesServiceProvider::boot()` no longer references the removed local variables (`$menuResourceClass`, `$menuPositionResourceClass`, `$pageResourceClass`) in the menu-items block — a leftover from the 1.1.1 resource-resolver refactor that raised `Undefined variable` whenever `register_menu_items` was enabled, breaking any app boot (e.g. `php artisan wayfinder:generate`). Menu items now resolve through `MoonShinePagesResources::menu()` / `::menuPosition()` / `::page()`.
+
 ## [1.0.8] - 2026-05-21
 
 ### Fixed
