@@ -72,17 +72,29 @@ class MenuFormPage extends FormPage
                             ),
 
                         Text::make(__('moonshine-pages::moonshine-pages.menu.fields.link'), 'link')
-                            ->fromRaw(function (mixed $raw): ?string {
-                                return data_get($raw, 'source_type') === 'link'
-                                    ? (string) data_get($raw, 'source_value')
-                                    : null;
-                            })
-                            ->onApply(function (mixed $menu, mixed $value): mixed {
-                                if (data_get(request()->all(), 'source_type') === 'link') {
-                                    data_set($menu, 'source_value', $value);
+                            ->changeFill(static function (mixed $item): ?string {
+                                if (data_get($item, 'source_type') !== 'link') {
+                                    return null;
                                 }
 
-                                return $menu;
+                                $link = (string) data_get($item, 'source_value');
+
+                                return $link === '' ? null : $link;
+                            })
+                            ->onApply(function (mixed $menu, mixed $value): mixed {
+                                $sourceType = (string) data_get($menu, 'source_type');
+
+                                if ($sourceType === 'route') {
+                                    return $menu;
+                                }
+
+                                if ($sourceType !== 'link') {
+                                    data_set($menu, 'source_value', null);
+
+                                    return $menu;
+                                }
+
+                                return $this->applySourceValue($menu, $value);
                             })
                             ->showWhen('source_type', 'link')
                             ->hint(__('moonshine-pages::moonshine-pages.menu.hints.link')),
@@ -104,6 +116,11 @@ class MenuFormPage extends FormPage
                             ->searchable()
                             ->nullable()
                             ->options($this->getRouteOptions())
+                            ->onApply(function (mixed $menu, mixed $value): mixed {
+                                return (string) data_get($menu, 'source_type') === 'route'
+                                    ? $this->applySourceValue($menu, $value)
+                                    : $menu;
+                            })
                             ->showWhen('source_type', 'route')
                             ->mergeAttribute(
                                 'x-on:change',
@@ -157,6 +174,27 @@ class MenuFormPage extends FormPage
         }
 
         return $rules;
+    }
+
+    /**
+     * Single writer for the `source_value` column, shared by the "link" text
+     * field and the route select. Both fields are applied on every save — the one
+     * hidden by `showWhen` included — so each writes only for its own
+     * `source_type`, otherwise the later field wipes what the earlier one stored.
+     * The column is left untouched when the field is absent from the request
+     * (`getRequestValue()` returns false).
+     */
+    private function applySourceValue(mixed $menu, mixed $value): mixed
+    {
+        if ($value === false || ! is_scalar($value)) {
+            return $menu;
+        }
+
+        $sourceValue = trim((string) $value);
+
+        data_set($menu, 'source_value', $sourceValue === '' ? null : $sourceValue);
+
+        return $menu;
     }
 
     /**
